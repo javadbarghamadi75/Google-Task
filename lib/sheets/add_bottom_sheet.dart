@@ -27,6 +27,7 @@ class _AddBottomSheetState extends State<AddBottomSheet> {
       lastDate: DateTime(todayDate.year + 10),
       height: MediaQuery.of(context).size.height * 0.35,
       textActionButton: _setTimeText,
+      borderRadius: smallCornerRadius,
       styleDatePicker: MaterialRoundedDatePickerStyle(
         paddingDatePicker: EdgeInsets.zero,
         paddingActionBar: EdgeInsets.zero,
@@ -53,6 +54,7 @@ class _AddBottomSheetState extends State<AddBottomSheet> {
     TimeOfDay pickedTime = await showRoundedTimePicker(
       context: buildContext,
       initialTime: _selectedTime,
+      borderRadius: smallCornerRadius,
     );
     if (pickedTime != null && pickedTime != _selectedTime) {
       setState(() {
@@ -78,8 +80,8 @@ class _AddBottomSheetState extends State<AddBottomSheet> {
       decoration: BoxDecoration(
         color: scaffoldBackgroundColor,
         borderRadius: BorderRadius.only(
-          topRight: Radius.circular(10),
-          topLeft: Radius.circular(10),
+          topRight: Radius.circular(smallCornerRadius),
+          topLeft: Radius.circular(smallCornerRadius),
         ),
       ),
       padding: EdgeInsets.only(
@@ -97,7 +99,7 @@ class _AddBottomSheetState extends State<AddBottomSheet> {
           _newTaskTextField(),
           _addDetailsTextField(),
           _selectedDateAndTimeChip(),
-          _buttonsRow(),
+          _buttonsRow(), //TODO : must check different ways to creat a task
         ],
       ),
     );
@@ -184,9 +186,9 @@ class _AddBottomSheetState extends State<AddBottomSheet> {
             backgroundColor: transparentColor,
             shape: ContinuousRectangleBorder(
               side: BorderSide(
-                color: chipColor,
+                color: chipBorderColor,
               ),
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(smallCornerRadius),
             ),
             deleteIcon: Icon(
               Icons.close,

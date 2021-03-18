@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_task/res.dart';
 import 'package:google_task/sheets/add_bottom_sheet.dart';
+import 'package:google_task/sheets/menu_bottom_sheet.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -50,7 +51,7 @@ homeFloatingActionButtonLocation() {
   return FloatingActionButtonLocation.centerDocked;
 }
 
-homeBottomNavigationBar() {
+homeBottomNavigationBar(BuildContext buildContext) {
   return BottomAppBar(
     shape: CircularNotchedRectangle(),
     notchMargin: 6,
@@ -58,8 +59,21 @@ homeBottomNavigationBar() {
     child: Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        IconButton(icon: Icon(Icons.menu), onPressed: () {}),
-        IconButton(icon: Icon(Icons.more_vert), onPressed: () {}),
+        IconButton(
+          icon: Icon(Icons.menu),
+          onPressed: () {
+            showModalBottomSheet(
+              context: buildContext,
+              builder: (build) => MenuBottomSheet(),
+              backgroundColor: Colors.transparent,
+              // isScrollControlled: true,
+            );
+          },
+        ),
+        IconButton(
+          icon: Icon(Icons.more_vert),
+          onPressed: () {},
+        ),
       ],
     ),
   );
@@ -72,7 +86,7 @@ class _HomeState extends State<Home> {
       appBar: homeAppBar(),
       floatingActionButton: homeFloatingActionButton(context),
       floatingActionButtonLocation: homeFloatingActionButtonLocation(),
-      bottomNavigationBar: homeBottomNavigationBar(),
+      bottomNavigationBar: homeBottomNavigationBar(context),
     );
   }
 }
