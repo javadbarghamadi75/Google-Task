@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_task/res.dart';
 import 'package:google_task/sheets/add_bottom_sheet.dart';
 import 'package:google_task/sheets/menu_bottom_sheet.dart';
+import 'package:google_task/sheets/more_bottom_sheet.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -72,7 +73,14 @@ homeBottomNavigationBar(BuildContext buildContext) {
         ),
         IconButton(
           icon: Icon(Icons.more_vert),
-          onPressed: () {},
+          onPressed: () {
+            showModalBottomSheet(
+              context: buildContext,
+              builder: (build) => MoreBottomSheet(),
+              backgroundColor: Colors.transparent,
+              // isScrollControlled: true,
+            );
+          },
         ),
       ],
     ),
