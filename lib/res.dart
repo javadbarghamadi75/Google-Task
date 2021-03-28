@@ -7,6 +7,19 @@ const Color newTaskTextColor = Color(0xff757575);
 const Color chipBorderColor = Color(0xff9e9e9e);
 const Color saveButtonColor = Color(0xff1A73E8);
 const Color transparentColor = Color(0x00ffffff);
+// MaterialColor saveButtonColor = MaterialColor(0xff1A73E8, customBlueColor);
+// Map<int, Color> customBlueColor = {
+//   50: Color.fromRGBO(26, 115, 232, 0.1),
+//   100: Color.fromRGBO(26, 115, 232, 0.2),
+//   200: Color.fromRGBO(26, 115, 232, 0.3),
+//   300: Color.fromRGBO(26, 115, 232, 0.4),
+//   400: Color.fromRGBO(26, 115, 232, 0.5),
+//   500: Color.fromRGBO(26, 115, 232, 0.6),
+//   600: Color.fromRGBO(26, 115, 232, 0.7),
+//   700: Color.fromRGBO(26, 115, 232, 0.8),
+//   800: Color.fromRGBO(26, 115, 232, 0.9),
+//   900: Color.fromRGBO(26, 115, 232, 1),
+// };
 
 //--Text--
 const double textSize34 = 34.0;

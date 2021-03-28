@@ -1,13 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:google_task/helpers/database_helper.dart';
+import 'package:google_task/models/lists_model.dart';
+import 'package:google_task/pages/creat_list_page.dart';
 import 'package:google_task/res.dart';
 
 class MenuBottomSheet extends StatefulWidget {
+  final Lists list;
+  final Future<int> futureInsertListsList;
+  final List<Lists> futureGetListsList;
+
+  MenuBottomSheet({
+    this.list,
+    this.futureInsertListsList,
+    this.futureGetListsList,
+  });
+
   @override
   _MenuBottomSheetState createState() => _MenuBottomSheetState();
 }
 
 class _MenuBottomSheetState extends State<MenuBottomSheet> {
   ImageProvider<Object> _userProfileImage;
+  Lists list;
 
   @override
   Widget build(BuildContext context) {
@@ -77,32 +91,60 @@ class _MenuBottomSheetState extends State<MenuBottomSheet> {
   }
 
   _listOfLists() {
+    return (widget.futureInsertListsList == null)
+        ? FutureBuilder(
+            future: DatabaseHelper.instance.getListsList(),
+            builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+              if (snapshot.connectionState == ConnectionState.done &&
+                  snapshot.hasData) {
+                return ListView.builder(
+                    itemCount: snapshot.data.length,
+                    itemBuilder: (BuildContext buildContext, int index) {
+                      return _list(snapshot.data[index]);
+                    });
+              }
+              return Text("XXXXXXXXXXXXX");
+            })
+        : {
+            list.listName = widget.list.listName,
+            _list(list),
+          };
+  }
+
+  Widget _list(Lists list) {
     return Padding(
       padding: const EdgeInsets.only(
         top: padding16,
         right: padding16,
         bottom: padding16,
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.only(
-          topRight: Radius.circular(bigCornerRadius),
-          bottomRight: Radius.circular(bigCornerRadius),
-        ),
-        child: ListTile(
-          title: Text(
-            'My Tasks',
-            style: TextStyle(
-              fontFamily: 'Product Sans',
-              fontSize: textSize16,
-              color: saveButtonColor,
+      child: GestureDetector(
+        onTap: () {
+          print(
+              'list tapped!  |  TODO : onTap must changes the list at home page');
+          print('کیلپ ررکت باید بعد از آنتپ اتفاق بیفته با آیدی تپ شده');
+        },
+        child: ClipRRect(
+          borderRadius: BorderRadius.only(
+            topRight: Radius.circular(bigCornerRadius),
+            bottomRight: Radius.circular(bigCornerRadius),
+          ),
+          child: ListTile(
+            title: Text(
+              list.listName,
+              style: TextStyle(
+                fontFamily: 'Product Sans',
+                fontSize: textSize16,
+                color: saveButtonColor,
+              ),
             ),
+            leading: CircleAvatar(
+              backgroundImage: null,
+              backgroundColor: transparentColor,
+            ),
+            selected: true,
+            selectedTileColor: saveButtonColor.withOpacity(0.1),
           ),
-          leading: CircleAvatar(
-            backgroundImage: null,
-            backgroundColor: transparentColor,
-          ),
-          selected: true,
-          selectedTileColor: saveButtonColor.withOpacity(0.1),
         ),
       ),
     );
@@ -126,7 +168,17 @@ class _MenuBottomSheetState extends State<MenuBottomSheet> {
           color: myTaskTextColor,
         ),
       ),
-      onTap: () {},
+      onTap: () {
+        Navigator.pop(context);
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) {
+              return CreatListPage();
+            },
+          ),
+        );
+      },
     );
   }
 

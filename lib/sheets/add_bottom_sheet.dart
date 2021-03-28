@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_rounded_date_picker/rounded_picker.dart';
+import 'package:google_task/helpers/database_helper.dart';
+import 'package:google_task/models/lists_model.dart';
+import 'package:google_task/models/tasks_model.dart';
 import 'package:google_task/res.dart';
 import 'package:intl/intl.dart';
 
@@ -18,6 +21,7 @@ class _AddBottomSheetState extends State<AddBottomSheet> {
   String _chipTimeText;
   final TextEditingController _newTaskInput = TextEditingController();
   final TextEditingController _addDetailsInput = TextEditingController();
+  final DateFormat _dateFormat = DateFormat('EEEE, d MMMM');
 
   dynamic _showDatePicker(BuildContext buildContext) async {
     DateTime pickedDate = await showRoundedDatePicker(
@@ -85,9 +89,9 @@ class _AddBottomSheetState extends State<AddBottomSheet> {
         ),
       ),
       padding: EdgeInsets.only(
-        left: padding24,
-        top: padding24,
-        right: padding24,
+        // left: padding24,
+        // top: padding12,
+        // right: padding24,
         bottom: MediaQuery.of(context).viewInsets.bottom,
       ),
       child: Column(
@@ -96,8 +100,9 @@ class _AddBottomSheetState extends State<AddBottomSheet> {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _newTaskTextField(),
-          _addDetailsTextField(),
+          // _newTaskTextField(),
+          // _addDetailsTextField(),
+          _newTaskAndDetails(), //TODO : check for bugs
           _selectedDateAndTimeChip(),
           _buttonsRow(), //TODO : must check different ways to creat a task
         ],
@@ -105,15 +110,71 @@ class _AddBottomSheetState extends State<AddBottomSheet> {
     );
   }
 
-  _newTaskTextField() {
-    return Padding(
-      padding: const EdgeInsets.only(
-        // left: padding24,
-        // top: padding24,
-        // right: padding24,
-        bottom: padding8,
-      ),
-      child: TextField(
+  // _newTaskTextField() {
+  //   return Padding(
+  //     padding: const EdgeInsets.only(
+  //       // left: padding24,
+  //       // top: padding24,
+  //       // right: padding24,
+  //       bottom: padding8,
+  //     ),
+  //     child: TextField(
+  //       controller: _newTaskInput,
+  //       textInputAction: TextInputAction.done,
+  //       textAlignVertical: TextAlignVertical.center,
+  //       maxLines: 3,
+  //       minLines: 1,
+  //       autofocus: true,
+  //       style: TextStyle(
+  //         fontSize: textSize18,
+  //         fontWeight: FontWeight.w500,
+  //       ),
+  //       decoration: InputDecoration.collapsed(
+  //         hintText: 'New task',
+  //         hintStyle: TextStyle(
+  //           fontSize: textSize18,
+  //           fontFamily: 'Product Sans',
+  //           color: newTaskTextColor,
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
+
+  // _addDetailsTextField() {
+  //   return _addDetailsTextFieldVisibility
+  //       ? Padding(
+  //           padding: const EdgeInsets.only(
+  //             // left: padding24,
+  //             // right: padding24,
+  //             bottom: padding8,
+  //           ),
+  //           child: TextField(
+  //             controller: _addDetailsInput,
+  //             textInputAction: TextInputAction.done,
+  //             textAlignVertical: TextAlignVertical.center,
+  //             maxLines: 1,
+  //             minLines: 1,
+  //             style: TextStyle(
+  //               fontSize: textSize14,
+  //               fontWeight: FontWeight.w500,
+  //             ),
+  //             decoration: InputDecoration.collapsed(
+  //               hintText: 'Add details',
+  //               hintStyle: TextStyle(
+  //                 fontSize: textSize14,
+  //                 fontFamily: 'Product Sans',
+  //                 color: newTaskTextColor,
+  //               ),
+  //             ),
+  //           ),
+  //         )
+  //       : Container();
+  // }
+
+  Widget _newTaskAndDetails() {
+    return ListTile(
+      title: TextField(
         controller: _newTaskInput,
         textInputAction: TextInputAction.done,
         textAlignVertical: TextAlignVertical.center,
@@ -133,18 +194,8 @@ class _AddBottomSheetState extends State<AddBottomSheet> {
           ),
         ),
       ),
-    );
-  }
-
-  _addDetailsTextField() {
-    return _addDetailsTextFieldVisibility
-        ? Padding(
-            padding: const EdgeInsets.only(
-              // left: padding24,
-              // right: padding24,
-              bottom: padding8,
-            ),
-            child: TextField(
+      subtitle: _addDetailsTextFieldVisibility
+          ? TextField(
               controller: _addDetailsInput,
               textInputAction: TextInputAction.done,
               textAlignVertical: TextAlignVertical.center,
@@ -162,58 +213,64 @@ class _AddBottomSheetState extends State<AddBottomSheet> {
                   color: newTaskTextColor,
                 ),
               ),
-            ),
-          )
-        : Container();
+            )
+          : null,
+    );
   }
 
-  _selectedDateAndTimeChip() {
+  Widget _selectedDateAndTimeChip() {
     return (_selectedDate == null)
         ? Container()
-        : Chip(
-            avatar: Icon(
-              Icons.today,
-              color: saveButtonColor,
-              size: iconSize18,
+        : Padding(
+            padding: const EdgeInsets.only(
+              left: padding16,
+              right: padding16,
             ),
-            label: (_chipTimeText == null)
-                ? Text(_chipDateText)
-                : Text(_chipDateText + ' | ' + _chipTimeText),
-            labelStyle: TextStyle(
-              fontSize: textSize14,
-              color: newTaskTextColor,
-            ),
-            backgroundColor: transparentColor,
-            shape: ContinuousRectangleBorder(
-              side: BorderSide(
-                color: chipBorderColor,
+            child: Chip(
+              avatar: Icon(
+                Icons.today,
+                color: saveButtonColor,
+                size: iconSize18,
               ),
-              borderRadius: BorderRadius.circular(smallCornerRadius),
+              label: (_chipTimeText == null)
+                  ? Text(_chipDateText)
+                  : Text(_chipDateText + ' | ' + _chipTimeText),
+              labelStyle: TextStyle(
+                fontSize: textSize14,
+                color: newTaskTextColor,
+              ),
+              backgroundColor: transparentColor,
+              shape: ContinuousRectangleBorder(
+                side: BorderSide(
+                  color: chipBorderColor,
+                ),
+                borderRadius: BorderRadius.circular(smallCornerRadius),
+              ),
+              deleteIcon: Icon(
+                Icons.close,
+                size: 18,
+              ),
+              onDeleted: () {
+                setState(() {
+                  _selectedDate = null;
+                });
+              },
             ),
-            deleteIcon: Icon(
-              Icons.close,
-              size: 18,
-            ),
-            onDeleted: () {
-              setState(() {
-                _selectedDate = null;
-              });
-            },
           );
   }
 
-  _buttonsRow() {
-    return Row(
-      mainAxisSize: MainAxisSize.max,
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(
-              // left: padding12,
-              // bottom: padding8,
-              ),
-          child: Row(
+  Widget _buttonsRow() {
+    return Padding(
+      padding: const EdgeInsets.only(
+        left: padding16,
+        right: padding16,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Row(
             mainAxisSize: MainAxisSize.max,
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -245,31 +302,46 @@ class _AddBottomSheetState extends State<AddBottomSheet> {
               ),
             ],
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(
-              // left: padding24,
-              // right: padding24,
-              // bottom: padding8,
-              ),
-          child: TextButton(
-            onPressed: () {
-              print(_newTaskInput.text);
-              print(_addDetailsInput.text);
-              print(_chipDateText);
-              print(_chipTimeText);
-            },
-            child: Text(
-              'Save',
-              style: TextStyle(
-                fontSize: textSize18,
-                color: saveButtonColor,
-                fontFamily: 'Product Sans',
+          Padding(
+            padding: const EdgeInsets.only(
+                // left: padding24,
+                // right: padding24,
+                // bottom: padding8,
+                ),
+            child: TextButton(
+              onPressed: () {
+                print(_newTaskInput.text);
+                print(_addDetailsInput.text);
+                print(_chipDateText);
+                print(_chipTimeText);
+                Tasks task = Tasks(
+                  listId: 0,
+                  taskStatus: 0,
+                  taskName: _newTaskInput.text,
+                  taskDetail: _addDetailsInput.text,
+                  //taskDate: DateTime.parse(_chipDateText),
+                  taskDate: _selectedDate,
+                  taskTime: TimeOfDay(
+                    hour: int.parse(_chipTimeText.split(":")[0]),
+                    minute: int.parse(
+                      _chipTimeText.split(":")[1],
+                    ),
+                  ),
+                );
+                DatabaseHelper.instance.insertTask(task);
+              },
+              child: Text(
+                'Save',
+                style: TextStyle(
+                  fontSize: textSize18,
+                  color: saveButtonColor,
+                  fontFamily: 'Product Sans',
+                ),
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

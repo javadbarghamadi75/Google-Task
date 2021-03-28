@@ -1,0 +1,48 @@
+// import 'package:flutter/material.dart';
+// import 'package:google_task/res.dart';
+
+// class HomeTasksListView extends StatefulWidget {
+//   final List<ListTile> newTaskAndDetailsList;
+//   final List<Chip> selectedDateAndTimeChipList;
+
+//   HomeTasksListView({
+//     Key key,
+//     this.newTaskAndDetailsList,
+//     this.selectedDateAndTimeChipList,
+//   }) : super(key: key);
+
+//   @override
+//   _HomeTasksListViewState createState() => _HomeTasksListViewState();
+// }
+
+// class _HomeTasksListViewState extends State<HomeTasksListView> {
+//   @override
+//   Widget build(BuildContext context) {
+//     return Container(
+//       decoration: BoxDecoration(
+//         color: scaffoldBackgroundColor,
+//         borderRadius: BorderRadius.only(
+//           topRight: Radius.circular(smallCornerRadius),
+//           topLeft: Radius.circular(smallCornerRadius),
+//         ),
+//       ),
+//       padding: EdgeInsets.only(
+//         // left: padding24,
+//         // top: padding12,
+//         // right: padding24,
+//         bottom: MediaQuery.of(context).viewInsets.bottom,
+//       ),
+//       child: Column(
+//         mainAxisSize: MainAxisSize.min,
+//         verticalDirection: VerticalDirection.down,
+//         mainAxisAlignment: MainAxisAlignment.start,
+//         crossAxisAlignment: CrossAxisAlignment.start,
+//         children: [
+//           ListView.builder(itemBuilder: (BuildContext buildContext, int index) {
+//             return;
+//           })
+//         ],
+//       ),
+//     );
+//   }
+// }
