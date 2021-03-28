@@ -7,8 +7,6 @@ import 'pages/home_page.dart';
 
 void main() {
   runApp(MyApp());
-  DatabaseHelper.instance.db;
-
   // SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
   //   statusBarColor: scaffoldBackgroundColor,
   //   statusBarIconBrightness: Brightness.dark,

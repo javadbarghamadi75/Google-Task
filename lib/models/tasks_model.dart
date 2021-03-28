@@ -33,7 +33,7 @@ class Tasks {
     final map = Map<String, dynamic>();
     map['listId'] = listId;
     if (taskId != null) {
-      map['taskId'] = listId;
+      map['taskId'] = taskId;
     }
     map['taskStatus'] = taskStatus;
     map['taskName'] = taskName;

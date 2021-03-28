@@ -1,27 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:google_task/helpers/database_helper.dart';
 import 'package:google_task/models/lists_model.dart';
+import 'package:google_task/models/tasks_model.dart';
 import 'package:google_task/pages/creat_list_page.dart';
 import 'package:google_task/res.dart';
 
 class MenuBottomSheet extends StatefulWidget {
-  final Lists list;
-  final Future<int> futureInsertListsList;
-  final List<Lists> futureGetListsList;
-
-  MenuBottomSheet({
-    this.list,
-    this.futureInsertListsList,
-    this.futureGetListsList,
-  });
-
   @override
   _MenuBottomSheetState createState() => _MenuBottomSheetState();
 }
 
 class _MenuBottomSheetState extends State<MenuBottomSheet> {
   ImageProvider<Object> _userProfileImage;
-  Lists list;
+  Future<List<Lists>> _listsList;
+
+  @override
+  void initState() {
+    _updateListsList();
+    super.initState();
+  }
+
+  _updateListsList() {
+    _listsList = DatabaseHelper.instance.getListsList();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -91,24 +92,37 @@ class _MenuBottomSheetState extends State<MenuBottomSheet> {
   }
 
   _listOfLists() {
-    return (widget.futureInsertListsList == null)
-        ? FutureBuilder(
-            future: DatabaseHelper.instance.getListsList(),
-            builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-              if (snapshot.connectionState == ConnectionState.done &&
-                  snapshot.hasData) {
-                return ListView.builder(
-                    itemCount: snapshot.data.length,
-                    itemBuilder: (BuildContext buildContext, int index) {
-                      return _list(snapshot.data[index]);
-                    });
-              }
-              return Text("XXXXXXXXXXXXX");
-            })
-        : {
-            list.listName = widget.list.listName,
-            _list(list),
-          };
+    return FutureBuilder(
+        future: _listsList,
+        builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+          // if (!snapshot.hasData) {
+          //   print('${snapshot.data.length}' + ' | 1');
+
+          //   Lists newList = Lists(listName: 'My Tasks');
+          //   DatabaseHelper.instance.insertList(newList);
+          //   _updateListsList();
+          //   return _list(snapshot.data);
+          // }
+          // // list.listName = 'My Tasks';
+          // // DatabaseHelper.instance.insertList(list);
+          // // return _list(list);
+          if (snapshot.connectionState == ConnectionState.done) {
+            print('${snapshot.data.length}' + ' | 2');
+            if (snapshot.data.length == 0) {
+              Lists newList = Lists(listName: 'My Tasks');
+              DatabaseHelper.instance.insertList(newList);
+              _updateListsList();
+              return _list(newList);
+            }
+            return ListView.builder(
+                shrinkWrap: true,
+                itemCount: snapshot.data.length,
+                itemBuilder: (BuildContext buildContext, int index) {
+                  return _list(snapshot.data[index]);
+                });
+          }
+          return Container();
+        });
   }
 
   Widget _list(Lists list) {

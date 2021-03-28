@@ -16,15 +16,15 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   Future<List<Tasks>> _tasksList;
-  Future<int> _list;
-  List<Lists> _listsList;
-  Lists _defaultList;
+  // Future<int> _list;
+  // List<Lists> _listsList;
+  // Lists _defaultList;
   final DateFormat _dateFormat = DateFormat('EEEE, d MMMM');
   //final TimeOfDayFormat _timeFormat = TimeOfDayFormat();
 
   @override
   void initState() {
-    _updateListsList();
+    // _updateListsList();
     _updateTasksList();
     super.initState();
   }
@@ -44,22 +44,22 @@ class _HomePageState extends State<HomePage> {
   //   });
   // }
 
-  _updateListsList() async {
-    _listsList = await DatabaseHelper.instance.getListsList();
-    if (_listsList == null) {
-      setState(() {
-        _defaultList.listName = 'My Tasks';
-        _list = DatabaseHelper.instance.insertList(_defaultList);
-        MenuBottomSheet(list: _defaultList, futureInsertListsList: _list);
-        print('step : creating default list');
-      });
-    }
-    setState(() {
-      if (_listsList != null) {}
-      MenuBottomSheet(futureGetListsList: _listsList);
-      print('step : getting list of existing lists');
-    });
-  }
+  // _updateListsList() async {
+  //   _listsList = await DatabaseHelper.instance.getListsList();
+  //   if (_listsList == null) {
+  //     setState(() {
+  //       _defaultList.listName = 'My Tasks';
+  //       _list = DatabaseHelper.instance.insertList(_defaultList);
+  //       MenuBottomSheet(list: _defaultList, futureInsertListsList: _list);
+  //       print('step : creating default list');
+  //     });
+  //   }
+  //   setState(() {
+  //     if (_listsList != null) {}
+  //     MenuBottomSheet(futureGetListsList: _listsList);
+  //     print('step : getting list of existing lists');
+  //   });
+  // }
 
   _updateTasksList() {
     setState(() {
