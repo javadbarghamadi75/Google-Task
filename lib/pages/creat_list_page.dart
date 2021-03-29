@@ -1,12 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:google_task/helpers/database_helper.dart';
+import 'package:google_task/models/lists_model.dart';
 import 'package:google_task/res.dart';
+import 'package:google_task/sheets/menu_bottom_sheet.dart';
 
 class CreatListPage extends StatefulWidget {
+  final Function updateListsList;
+
+  CreatListPage({this.updateListsList});
+
   @override
   _CreatListPageState createState() => _CreatListPageState();
 }
 
 class _CreatListPageState extends State<CreatListPage> {
+  TextEditingController textEditingController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -14,7 +23,13 @@ class _CreatListPageState extends State<CreatListPage> {
         backgroundColor: scaffoldBackgroundColor,
         leading: GestureDetector(
           onTap: () {
-            return Navigator.pop(context);
+            Navigator.pop(context);
+            showModalBottomSheet(
+              context: context,
+              builder: (build) => MenuBottomSheet(),
+              backgroundColor: Colors.transparent,
+              isScrollControlled: false,
+            );
           },
           child: Icon(
             Icons.close,
@@ -34,6 +49,31 @@ class _CreatListPageState extends State<CreatListPage> {
               //   newTaskAndDetailsList: _newTaskAndDetailsList,
               //   selectedDateAndTimeChipList: _selectedDateAndTimeChipList,
               // );
+              if (textEditingController.text == null ||
+                  textEditingController.text == '') {
+                Navigator.pop(context);
+              } else {
+                Lists newListName = Lists(listName: textEditingController.text);
+                DatabaseHelper.instance.insertList(newListName);
+                widget.updateListsList;
+                Navigator.pop(context);
+                showModalBottomSheet(
+                  context: context,
+                  builder: (build) => MenuBottomSheet(),
+                  backgroundColor: Colors.transparent,
+                  isScrollControlled: false,
+                );
+              }
+              // widget.updateListsList;
+              // Navigator.push(
+              //   context,
+              //   MaterialPageRoute(
+              //     builder: (_) {
+              //       return MenuBottomSheet();
+              //     },
+              //   ),
+              // );
+              // مثل فیلم باید فکر کنم از کالبک فانکشن ها استفاده بشه
             },
             child: Text(
               'Done',
@@ -47,7 +87,9 @@ class _CreatListPageState extends State<CreatListPage> {
         ],
       ),
       body: Form(
-        child: TextFormField(),
+        child: TextField(
+          controller: textEditingController,
+        ),
       ),
     );
   }

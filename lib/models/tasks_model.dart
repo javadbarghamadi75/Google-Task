@@ -55,10 +55,8 @@ class Tasks {
       taskDetail: map['taskDetail'],
       taskDate: DateTime.parse(map['taskDate']),
       taskTime: TimeOfDay(
-        hour: int.parse(map['taskTime'].split(":")[0]),
-        minute: int.parse(
-          map['taskTime'].split(":")[1],
-        ),
+        hour: int.parse(map['taskTime'].substring(1, 3)),
+        minute: int.parse(map['taskTime'].substring(4, 6)),
       ),
     );
   }

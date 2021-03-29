@@ -8,6 +8,10 @@ import 'package:google_task/res.dart';
 import 'package:intl/intl.dart';
 
 class AddBottomSheet extends StatefulWidget {
+  final Function updateTasksList;
+
+  AddBottomSheet({this.updateTasksList});
+
   @override
   _AddBottomSheetState createState() => _AddBottomSheetState();
 }
@@ -314,8 +318,8 @@ class _AddBottomSheetState extends State<AddBottomSheet> {
                 print(_addDetailsInput.text);
                 print(_chipDateText);
                 print(_chipTimeText);
-                Tasks task = Tasks(
-                  listId: 0,
+                Tasks newTask = Tasks(
+                  listId: 1,
                   taskStatus: 0,
                   taskName: _newTaskInput.text,
                   taskDetail: _addDetailsInput.text,
@@ -328,7 +332,9 @@ class _AddBottomSheetState extends State<AddBottomSheet> {
                     ),
                   ),
                 );
-                DatabaseHelper.instance.insertTask(task);
+                DatabaseHelper.instance.insertTask(newTask);
+                widget.updateTasksList;
+                Navigator.pop(context);
               },
               child: Text(
                 'Save',

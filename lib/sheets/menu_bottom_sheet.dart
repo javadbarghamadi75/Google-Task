@@ -1,9 +1,11 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_task/helpers/database_helper.dart';
 import 'package:google_task/models/lists_model.dart';
 import 'package:google_task/models/tasks_model.dart';
 import 'package:google_task/pages/creat_list_page.dart';
 import 'package:google_task/res.dart';
+import 'package:sqflite/utils/utils.dart';
 
 class MenuBottomSheet extends StatefulWidget {
   @override
@@ -21,7 +23,9 @@ class _MenuBottomSheetState extends State<MenuBottomSheet> {
   }
 
   _updateListsList() {
-    _listsList = DatabaseHelper.instance.getListsList();
+    setState(() {
+      _listsList = DatabaseHelper.instance.getListsList();
+    });
   }
 
   @override
@@ -34,24 +38,26 @@ class _MenuBottomSheetState extends State<MenuBottomSheet> {
           topLeft: Radius.circular(smallCornerRadius),
         ),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        verticalDirection: VerticalDirection.down,
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _userInfoRow(), //TODO : how about login with Google Account
-          _divider(),
-          _listOfLists(), //TODO : must be a ListView.builder
-          _divider(),
-          _createNewList(), //TODO : check some added new list (modalbottomsheet height/scroll/etc)
-          _divider(),
-          _helpAndFeedback(), //TODO : must be a link
-          _divider(),
-          _opensourceLicenses(), //TODO : must be a link
-          _divider(),
-          _privacyPolicy(), //TODO : must be a link
-        ],
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          verticalDirection: VerticalDirection.down,
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _userInfoRow(), //TODO : how about login with Google Account
+            _divider(),
+            _listOfLists(), //TODO : must be a ListView.builder
+            _divider(),
+            _createNewList(), //TODO : check some added new list (modalbottomsheet height/scroll/etc)
+            _divider(),
+            _helpAndFeedback(), //TODO : must be a link
+            _divider(),
+            _opensourceLicenses(), //TODO : must be a link
+            _divider(),
+            _privacyPolicy(), //TODO : must be a link
+          ],
+        ),
       ),
     );
   }
@@ -95,43 +101,40 @@ class _MenuBottomSheetState extends State<MenuBottomSheet> {
     return FutureBuilder(
         future: _listsList,
         builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-          // if (!snapshot.hasData) {
-          //   print('${snapshot.data.length}' + ' | 1');
-
-          //   Lists newList = Lists(listName: 'My Tasks');
-          //   DatabaseHelper.instance.insertList(newList);
-          //   _updateListsList();
-          //   return _list(snapshot.data);
-          // }
-          // // list.listName = 'My Tasks';
-          // // DatabaseHelper.instance.insertList(list);
-          // // return _list(list);
           if (snapshot.connectionState == ConnectionState.done) {
-            print('${snapshot.data.length}' + ' | 2');
             if (snapshot.data.length == 0) {
               Lists newList = Lists(listName: 'My Tasks');
               DatabaseHelper.instance.insertList(newList);
               _updateListsList();
               return _list(newList);
-            }
-            return ListView.builder(
+            } else {
+              return ListView.builder(
+                physics: const NeverScrollableScrollPhysics(),
                 shrinkWrap: true,
                 itemCount: snapshot.data.length,
                 itemBuilder: (BuildContext buildContext, int index) {
+                  print('${snapshot.data[index].listId}');
                   return _list(snapshot.data[index]);
-                });
+                },
+              );
+            }
           }
-          return Container();
+          return Text('Connection State : not Done!');
         });
   }
 
-  Widget _list(Lists list) {
+  Widget _list(Lists theList) {
     return Padding(
-      padding: const EdgeInsets.only(
-        top: padding16,
-        right: padding16,
-        bottom: padding16,
-      ),
+      padding: (theList.listId == 1)
+          ? EdgeInsets.only(
+              top: padding16,
+              right: padding16,
+              bottom: padding16,
+            )
+          : EdgeInsets.only(
+              right: padding16,
+              bottom: padding16,
+            ),
       child: GestureDetector(
         onTap: () {
           print(
@@ -145,7 +148,7 @@ class _MenuBottomSheetState extends State<MenuBottomSheet> {
           ),
           child: ListTile(
             title: Text(
-              list.listName,
+              theList.listName,
               style: TextStyle(
                 fontFamily: 'Product Sans',
                 fontSize: textSize16,
@@ -188,7 +191,9 @@ class _MenuBottomSheetState extends State<MenuBottomSheet> {
           context,
           MaterialPageRoute(
             builder: (_) {
-              return CreatListPage();
+              return CreatListPage(
+                updateListsList: _updateListsList,
+              );
             },
           ),
         );

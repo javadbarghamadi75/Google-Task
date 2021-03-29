@@ -69,6 +69,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    print(DatabaseHelper.instance.getTasksList());
     return Scaffold(
       appBar: _appBar(),
       body: _listView(),
@@ -100,30 +101,46 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  _listView() {
-    return FutureBuilder(
-        future: DatabaseHelper.instance.getTasksList(),
+  FutureBuilder<List<Tasks>> _listView() {
+    return FutureBuilder<List<Tasks>>(
+        future: _tasksList,
         builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-          if (!snapshot.hasData) {
-            return Center(
-              child: CircularProgressIndicator(),
-            );
+          print('${snapshot.connectionState}');
+          if (snapshot.connectionState == ConnectionState.done) {
+            // print('${snapshot.data.length}' + ' | 1');
+            if (snapshot.hasData &&
+                snapshot.data != null &&
+                snapshot.data.length > 0) {
+              // Tasks defaultTask = Tasks(
+              //   listId: 1,
+              //   taskName: 'New Task',
+              //   taskDetail: 'Add Details',
+              //   taskStatus: 0,
+              //   taskDate: DateTime.now(),
+              //   taskTime: TimeOfDay.now(),
+              // );
+              // DatabaseHelper.instance.insertTask(defaultTask);
+              // return _task(defaultTask);
+              // return Center(
+              //   child: Text('WELCOME!'),
+              // );
+            } else {
+              print('${snapshot.data.length}' + ' | 2');
+              return ListView.builder(
+                shrinkWrap: true,
+                itemCount: snapshot.data.length,
+                itemBuilder: (BuildContext buildContext, int index) {
+                  print('${snapshot.data[index].listId}');
+                  return _task(snapshot.data[index]);
+                },
+              );
+            }
           }
-
-          // final int completedTasksCount = snapshot.data
-          //     .where((Tasks tasks) => tasks.taskStatus == 1)
-          //     .toList()
-          //     .length;
-
-          return ListView.builder(
-              itemCount: snapshot.data.length,
-              itemBuilder: (BuildContext buildContext, int index) {
-                return _task(snapshot.data[index]);
-              });
+          return Text('Connection State : not Done!?');
         });
   }
 
-  Widget _task(Tasks tasks) {
+  Widget _task(Tasks theTask) {
     return GestureDetector(
       onTap: () {
         print('task tapped');
@@ -141,25 +158,25 @@ class _HomePageState extends State<HomePage> {
         children: [
           ListTile(
             leading: Checkbox(
-              value: tasks.taskStatus == 0 ? false : true,
+              value: theTask.taskStatus == 0 ? false : true,
               onChanged: (value) {
-                tasks.taskStatus = value ? 1 : 0;
-                DatabaseHelper.instance.updateTask(tasks);
+                theTask.taskStatus = value ? 1 : 0;
+                DatabaseHelper.instance.updateTask(theTask);
                 _updateTasksList();
               },
             ),
             title: Text(
-              tasks.taskName,
+              theTask.taskName,
               style: TextStyle(
-                decoration: (tasks.taskStatus == 0)
+                decoration: (theTask.taskStatus == 0)
                     ? TextDecoration.none
                     : TextDecoration.lineThrough,
               ),
             ),
             subtitle: Text(
-              tasks.taskDetail,
+              theTask.taskDetail,
               style: TextStyle(
-                decoration: (tasks.taskStatus == 0)
+                decoration: (theTask.taskStatus == 0)
                     ? TextDecoration.none
                     : TextDecoration.lineThrough,
               ),
@@ -168,7 +185,7 @@ class _HomePageState extends State<HomePage> {
               context,
               MaterialPageRoute(
                 builder: (_) => EditSpecificTaskPage(
-                  task: tasks,
+                  task: theTask,
                 ),
               ),
             ),
@@ -179,7 +196,7 @@ class _HomePageState extends State<HomePage> {
             },
             child: Chip(
               label: Text(
-                  '${_dateFormat.format(tasks.taskDate)} | ${tasks.taskTime.format(context)}'),
+                  '${_dateFormat.format(theTask.taskDate)} | ${theTask.taskTime.format(context)}'),
               avatar: Icon(
                 Icons.today,
                 color: saveButtonColor,
@@ -232,7 +249,9 @@ class _HomePageState extends State<HomePage> {
     return FloatingActionButton(
       onPressed: () => showModalBottomSheet(
         context: buildContext,
-        builder: (build) => AddBottomSheet(),
+        builder: (_) => AddBottomSheet(
+          updateTasksList: _updateTasksList,
+        ),
         backgroundColor: Colors.transparent,
         isScrollControlled: true,
       ).whenComplete(() => _updateTasksList()),
@@ -264,7 +283,7 @@ class _HomePageState extends State<HomePage> {
                 context: buildContext,
                 builder: (build) => MenuBottomSheet(),
                 backgroundColor: Colors.transparent,
-                // isScrollControlled: true,
+                isScrollControlled: false,
               );
             },
           ),
