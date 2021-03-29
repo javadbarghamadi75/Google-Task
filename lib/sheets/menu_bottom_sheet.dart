@@ -1,11 +1,8 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_task/helpers/database_helper.dart';
 import 'package:google_task/models/lists_model.dart';
-import 'package:google_task/models/tasks_model.dart';
 import 'package:google_task/pages/creat_list_page.dart';
 import 'package:google_task/res.dart';
-import 'package:sqflite/utils/utils.dart';
 
 class MenuBottomSheet extends StatefulWidget {
   @override

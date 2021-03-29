@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_rounded_date_picker/rounded_picker.dart';
 import 'package:google_task/helpers/database_helper.dart';
-import 'package:google_task/models/lists_model.dart';
 import 'package:google_task/models/tasks_model.dart';
 import 'package:google_task/res.dart';
 import 'package:intl/intl.dart';
@@ -93,9 +92,6 @@ class _AddBottomSheetState extends State<AddBottomSheet> {
         ),
       ),
       padding: EdgeInsets.only(
-        // left: padding24,
-        // top: padding12,
-        // right: padding24,
         bottom: MediaQuery.of(context).viewInsets.bottom,
       ),
       child: Column(
@@ -113,68 +109,6 @@ class _AddBottomSheetState extends State<AddBottomSheet> {
       ),
     );
   }
-
-  // _newTaskTextField() {
-  //   return Padding(
-  //     padding: const EdgeInsets.only(
-  //       // left: padding24,
-  //       // top: padding24,
-  //       // right: padding24,
-  //       bottom: padding8,
-  //     ),
-  //     child: TextField(
-  //       controller: _newTaskInput,
-  //       textInputAction: TextInputAction.done,
-  //       textAlignVertical: TextAlignVertical.center,
-  //       maxLines: 3,
-  //       minLines: 1,
-  //       autofocus: true,
-  //       style: TextStyle(
-  //         fontSize: textSize18,
-  //         fontWeight: FontWeight.w500,
-  //       ),
-  //       decoration: InputDecoration.collapsed(
-  //         hintText: 'New task',
-  //         hintStyle: TextStyle(
-  //           fontSize: textSize18,
-  //           fontFamily: 'Product Sans',
-  //           color: newTaskTextColor,
-  //         ),
-  //       ),
-  //     ),
-  //   );
-  // }
-
-  // _addDetailsTextField() {
-  //   return _addDetailsTextFieldVisibility
-  //       ? Padding(
-  //           padding: const EdgeInsets.only(
-  //             // left: padding24,
-  //             // right: padding24,
-  //             bottom: padding8,
-  //           ),
-  //           child: TextField(
-  //             controller: _addDetailsInput,
-  //             textInputAction: TextInputAction.done,
-  //             textAlignVertical: TextAlignVertical.center,
-  //             maxLines: 1,
-  //             minLines: 1,
-  //             style: TextStyle(
-  //               fontSize: textSize14,
-  //               fontWeight: FontWeight.w500,
-  //             ),
-  //             decoration: InputDecoration.collapsed(
-  //               hintText: 'Add details',
-  //               hintStyle: TextStyle(
-  //                 fontSize: textSize14,
-  //                 fontFamily: 'Product Sans',
-  //                 color: newTaskTextColor,
-  //               ),
-  //             ),
-  //           ),
-  //         )
-  //       : Container();
-  // }
 
   Widget _newTaskAndDetails() {
     return ListTile(
@@ -306,43 +240,34 @@ class _AddBottomSheetState extends State<AddBottomSheet> {
               ),
             ],
           ),
-          Padding(
-            padding: const EdgeInsets.only(
-                // left: padding24,
-                // right: padding24,
-                // bottom: padding8,
+          TextButton(
+            onPressed: () {
+              print(_newTaskInput.text);
+              print(_addDetailsInput.text);
+              print(_chipDateText);
+              print(_chipTimeText);
+              Tasks newTask = Tasks(
+                listId: 1,
+                taskStatus: 0,
+                taskName: _newTaskInput.text,
+                taskDetail: _addDetailsInput.text,
+                //taskDate: DateTime.parse(_chipDateText),
+                taskDate: _selectedDate,
+                taskTime: TimeOfDay(
+                  hour: int.parse(_chipTimeText.split(":")[0]),
+                  minute: int.parse(_chipTimeText.split(":")[1]),
                 ),
-            child: TextButton(
-              onPressed: () {
-                print(_newTaskInput.text);
-                print(_addDetailsInput.text);
-                print(_chipDateText);
-                print(_chipTimeText);
-                Tasks newTask = Tasks(
-                  listId: 1,
-                  taskStatus: 0,
-                  taskName: _newTaskInput.text,
-                  taskDetail: _addDetailsInput.text,
-                  //taskDate: DateTime.parse(_chipDateText),
-                  taskDate: _selectedDate,
-                  taskTime: TimeOfDay(
-                    hour: int.parse(_chipTimeText.split(":")[0]),
-                    minute: int.parse(
-                      _chipTimeText.split(":")[1],
-                    ),
-                  ),
-                );
-                DatabaseHelper.instance.insertTask(newTask);
-                widget.updateTasksList;
-                Navigator.pop(context);
-              },
-              child: Text(
-                'Save',
-                style: TextStyle(
-                  fontSize: textSize18,
-                  color: saveButtonColor,
-                  fontFamily: 'Product Sans',
-                ),
+              );
+              DatabaseHelper.instance.insertTask(newTask);
+              widget.updateTasksList;
+              Navigator.pop(context);
+            },
+            child: Text(
+              'Save',
+              style: TextStyle(
+                fontSize: textSize18,
+                color: saveButtonColor,
+                fontFamily: 'Product Sans',
               ),
             ),
           ),

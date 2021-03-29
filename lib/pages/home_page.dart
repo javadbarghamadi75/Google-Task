@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_task/helpers/database_helper.dart';
-import 'package:google_task/models/lists_model.dart';
 import 'package:google_task/models/tasks_model.dart';
 import 'package:google_task/pages/edit_specific_task_page.dart';
 import 'package:google_task/res.dart';
@@ -16,50 +15,13 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   Future<List<Tasks>> _tasksList;
-  // Future<int> _list;
-  // List<Lists> _listsList;
-  // Lists _defaultList;
   final DateFormat _dateFormat = DateFormat('EEEE, d MMMM');
-  //final TimeOfDayFormat _timeFormat = TimeOfDayFormat();
 
   @override
   void initState() {
-    // _updateListsList();
     _updateTasksList();
     super.initState();
   }
-
-  // _updateListsList() {
-  //   setState(() {
-  //     DatabaseHelper.instance.getListsList().then((value) {
-  //       if (value == null) {
-  //         _defaultList.listName = 'My Tasks';
-  //         _list = DatabaseHelper.instance.insertList(_defaultList);
-  //         MenuBottomSheet(list: _defaultList, futureInsertListsList: _list);
-  //         print('step : creating default list');
-  //       }
-  //       MenuBottomSheet(futureGetListsList: _listsList);
-  //       print('step : getting list of existing lists');
-  //     });
-  //   });
-  // }
-
-  // _updateListsList() async {
-  //   _listsList = await DatabaseHelper.instance.getListsList();
-  //   if (_listsList == null) {
-  //     setState(() {
-  //       _defaultList.listName = 'My Tasks';
-  //       _list = DatabaseHelper.instance.insertList(_defaultList);
-  //       MenuBottomSheet(list: _defaultList, futureInsertListsList: _list);
-  //       print('step : creating default list');
-  //     });
-  //   }
-  //   setState(() {
-  //     if (_listsList != null) {}
-  //     MenuBottomSheet(futureGetListsList: _listsList);
-  //     print('step : getting list of existing lists');
-  //   });
-  // }
 
   _updateTasksList() {
     setState(() {
@@ -101,31 +63,17 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  FutureBuilder<List<Tasks>> _listView() {
+  _listView() {
     return FutureBuilder<List<Tasks>>(
         future: _tasksList,
         builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-          print('${snapshot.connectionState}');
+          print('snapshot.connectionState : ${snapshot.connectionState}');
           if (snapshot.connectionState == ConnectionState.done) {
-            // print('${snapshot.data.length}' + ' | 1');
             if (snapshot.hasData &&
                 snapshot.data != null &&
                 snapshot.data.length > 0) {
-              // Tasks defaultTask = Tasks(
-              //   listId: 1,
-              //   taskName: 'New Task',
-              //   taskDetail: 'Add Details',
-              //   taskStatus: 0,
-              //   taskDate: DateTime.now(),
-              //   taskTime: TimeOfDay.now(),
-              // );
-              // DatabaseHelper.instance.insertTask(defaultTask);
-              // return _task(defaultTask);
-              // return Center(
-              //   child: Text('WELCOME!'),
-              // );
-            } else {
-              print('${snapshot.data.length}' + ' | 2');
+              print('snapshot.hasData : ${snapshot.hasData}');
+
               return ListView.builder(
                 shrinkWrap: true,
                 itemCount: snapshot.data.length,
@@ -134,13 +82,20 @@ class _HomePageState extends State<HomePage> {
                   return _task(snapshot.data[index]);
                 },
               );
+            } else if (snapshot.hasData == false &&
+                snapshot.data == null &&
+                snapshot.data.length == 0) {
+              print('snapshot.hasData : ${snapshot.hasData}');
+              return Center(
+                child: Text('There is No Data!'),
+              );
             }
           }
           return Text('Connection State : not Done!?');
         });
   }
 
-  Widget _task(Tasks theTask) {
+  _task(Tasks theTask) {
     return GestureDetector(
       onTap: () {
         print('task tapped');
@@ -232,18 +187,6 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
-
-  // _showModalBottomSheet() {
-  //   Future<void> showBottomSheet = showModalBottomSheet(
-  //     context: context,
-  //     builder: (build) => AddBottomSheet(),
-  //     backgroundColor: Colors.transparent,
-  //     isScrollControlled: true,
-  //   );
-  //   showBottomSheet.then((value) => _onCloseModalBottomSheet(value));
-  // }
-
-  // _onCloseModalBottomSheet(void value) {}
 
   _floatingActionButton(BuildContext buildContext) {
     return FloatingActionButton(
