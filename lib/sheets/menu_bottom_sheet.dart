@@ -96,7 +96,7 @@ class _MenuBottomSheetState extends State<MenuBottomSheet> {
 
   _listOfLists() {
     return FutureBuilder(
-        future: _listsList,
+        future: DatabaseHelper.instance.getListsList(),
         builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
             if (snapshot.data.length == 0) {

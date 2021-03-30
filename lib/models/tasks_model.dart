@@ -1,13 +1,11 @@
-import 'package:flutter/material.dart';
-
 class Tasks {
   int listId;
   int taskId;
   int taskStatus;
   String taskName;
   String taskDetail;
-  DateTime taskDate;
-  TimeOfDay taskTime;
+  String taskDate;
+  String taskTime;
 
   Tasks({
     this.listId,
@@ -38,8 +36,8 @@ class Tasks {
     map['taskStatus'] = taskStatus;
     map['taskName'] = taskName;
     map['taskDetail'] = taskDetail;
-    map['taskDate'] = taskDate.toIso8601String();
-    map['taskTime'] = taskTime.toString();
+    map['taskDate'] = taskDate;
+    map['taskTime'] = taskTime;
     return map;
   }
 
@@ -53,11 +51,8 @@ class Tasks {
       taskStatus: map['taskStatus'],
       taskName: map['taskName'],
       taskDetail: map['taskDetail'],
-      taskDate: DateTime.parse(map['taskDate']),
-      taskTime: TimeOfDay(
-        hour: int.parse(map['taskTime'].substring(1, 3)),
-        minute: int.parse(map['taskTime'].substring(4, 6)),
-      ),
+      taskDate: map['taskDate'],
+      taskTime: map['taskTime'],
     );
   }
 }

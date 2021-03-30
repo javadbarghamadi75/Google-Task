@@ -31,7 +31,6 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    print(DatabaseHelper.instance.getTasksList());
     return Scaffold(
       appBar: _appBar(),
       body: _listView(),
@@ -65,14 +64,18 @@ class _HomePageState extends State<HomePage> {
 
   _listView() {
     return FutureBuilder<List<Tasks>>(
-        future: _tasksList,
-        builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+        // TODO : these steps must be check for all pages!
+        future: DatabaseHelper.instance.getTasksList(),
+        builder: (BuildContext context, AsyncSnapshot<List<Tasks>> snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          }
           print('snapshot.connectionState : ${snapshot.connectionState}');
           if (snapshot.connectionState == ConnectionState.done) {
-            if (snapshot.hasData &&
-                snapshot.data != null &&
-                snapshot.data.length > 0) {
-              print('snapshot.hasData : ${snapshot.hasData}');
+            if (snapshot.hasData && snapshot.data.length > 0) {
+              print('data : ${snapshot.data.toString()}');
 
               return ListView.builder(
                 shrinkWrap: true,
@@ -82,16 +85,14 @@ class _HomePageState extends State<HomePage> {
                   return _task(snapshot.data[index]);
                 },
               );
-            } else if (snapshot.hasData == false &&
-                snapshot.data == null &&
-                snapshot.data.length == 0) {
-              print('snapshot.hasData : ${snapshot.hasData}');
+            } else {
               return Center(
                 child: Text('There is No Data!'),
               );
             }
+          } else {
+            return Text('Connection State : not Done!?');
           }
-          return Text('Connection State : not Done!?');
         });
   }
 
@@ -103,10 +104,17 @@ class _HomePageState extends State<HomePage> {
           context,
           MaterialPageRoute(
             builder: (_) {
-              return EditSpecificTaskPage();
+              return EditSpecificTaskPage(
+                theTask: theTask,
+                updateTask: DatabaseHelper.instance.getTasksList,
+                // theTaskName: theTask.taskName,
+                // theTaskDetail: theTask.taskDetail,
+                // theTaskDate: theTask.taskDate,
+                // theTaskTime: theTask.taskTime,
+              );
             },
           ),
-        );
+        ).then((value) => _updateTasksList());
       },
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -120,67 +128,73 @@ class _HomePageState extends State<HomePage> {
                 _updateTasksList();
               },
             ),
-            title: Text(
-              theTask.taskName,
-              style: TextStyle(
-                decoration: (theTask.taskStatus == 0)
-                    ? TextDecoration.none
-                    : TextDecoration.lineThrough,
-              ),
-            ),
-            subtitle: Text(
-              theTask.taskDetail,
-              style: TextStyle(
-                decoration: (theTask.taskStatus == 0)
-                    ? TextDecoration.none
-                    : TextDecoration.lineThrough,
-              ),
-            ),
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => EditSpecificTaskPage(
-                  task: theTask,
-                ),
-              ),
-            ),
+            title: (theTask.taskName == null)
+                ? null
+                : Text(
+                    theTask.taskName,
+                    style: TextStyle(
+                      decoration: (theTask.taskStatus == 0)
+                          ? TextDecoration.none
+                          : TextDecoration.lineThrough,
+                    ),
+                  ),
+            subtitle: (theTask.taskDetail == null)
+                ? null
+                : Text(
+                    theTask.taskDetail,
+                    style: TextStyle(
+                      decoration: (theTask.taskStatus == 0)
+                          ? TextDecoration.none
+                          : TextDecoration.lineThrough,
+                    ),
+                  ),
+            // onTap: () => Navigator.push(
+            //   context,
+            //   MaterialPageRoute(
+            //     builder: (_) => EditSpecificTaskPage(
+            //       theTask: theTask,
+            //     ),
+            //   ),
+            // ),
           ),
           GestureDetector(
             onTap: () {
               print('chip tapped');
             },
-            child: Chip(
-              label: Text(
-                  '${_dateFormat.format(theTask.taskDate)} | ${theTask.taskTime.format(context)}'),
-              avatar: Icon(
-                Icons.today,
-                color: saveButtonColor,
-                size: iconSize18,
-              ),
-              // label: (_chipTimeText == null)
-              //     ? Text(_chipDateText)
-              //     : Text(_chipDateText + ' | ' + _chipTimeText),
-              labelStyle: TextStyle(
-                fontSize: textSize14,
-                color: newTaskTextColor,
-              ),
-              backgroundColor: transparentColor,
-              shape: ContinuousRectangleBorder(
-                side: BorderSide(
-                  color: chipBorderColor,
-                ),
-                borderRadius: BorderRadius.circular(smallCornerRadius),
-              ),
-              deleteIcon: Icon(
-                Icons.close,
-                size: 18,
-              ),
-              onDeleted: () {
-                setState(() {
-                  // _selectedDate = null;
-                });
-              },
-            ),
+            child: (theTask.taskDate == null || theTask.taskTime == null)
+                ? null
+                : Chip(
+                    label: Text(
+                        '${_dateFormat.format(DateTime.parse(theTask.taskDate))} | ${theTask.taskTime}'),
+                    avatar: Icon(
+                      Icons.today,
+                      color: saveButtonColor,
+                      size: iconSize18,
+                    ),
+                    // label: (_chipTimeText == null)
+                    //     ? Text(_chipDateText)
+                    //     : Text(_chipDateText + ' | ' + _chipTimeText),
+                    labelStyle: TextStyle(
+                      fontSize: textSize14,
+                      color: newTaskTextColor,
+                    ),
+                    backgroundColor: transparentColor,
+                    shape: ContinuousRectangleBorder(
+                      side: BorderSide(
+                        color: chipBorderColor,
+                      ),
+                      borderRadius: BorderRadius.circular(smallCornerRadius),
+                    ),
+                    deleteIcon: Icon(
+                      Icons.close,
+                      size: 18,
+                    ),
+                    onDeleted: () {
+                      setState(() {
+                        // _selectedDate = null;
+                      });
+                    },
+                  ),
           ),
           Divider()
         ],
@@ -197,7 +211,7 @@ class _HomePageState extends State<HomePage> {
         ),
         backgroundColor: Colors.transparent,
         isScrollControlled: true,
-      ).whenComplete(() => _updateTasksList()),
+      ).then((_) => this.setState(() {})),
       child: Icon(
         Icons.add,
         size: iconSize42,

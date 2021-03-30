@@ -2,13 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:flutter_rounded_date_picker/rounded_picker.dart';
 import 'package:google_task/helpers/database_helper.dart';
 import 'package:google_task/models/tasks_model.dart';
+import 'package:google_task/pages/home_page.dart';
 import 'package:google_task/res.dart';
 import 'package:intl/intl.dart';
 
 class EditSpecificTaskPage extends StatefulWidget {
-  final Tasks task;
+  final Tasks theTask;
+  final Function updateTask;
+  // final String theTaskName;
+  // final String theTaskDetail;
+  // final String theTaskDate;
+  // final String theTaskTime;
 
-  EditSpecificTaskPage({this.task});
+  EditSpecificTaskPage({
+    this.theTask,
+    // this.theTaskName,
+    // this.theTaskDetail,
+    // this.theTaskDate,
+    // this.theTaskTime,
+    this.updateTask,
+  });
 
   @override
   _EditSpecificTaskPageState createState() => _EditSpecificTaskPageState();
@@ -16,17 +29,20 @@ class EditSpecificTaskPage extends StatefulWidget {
 
 class _EditSpecificTaskPageState extends State<EditSpecificTaskPage> {
   //String _taskList;
-  //int _taskStatus;
-  String _taskName = '';
-  String _taskDetails = '';
-  DateTime _taskDate;
-  TimeOfDay _taskTime;
-
+  int _theTaskStatus;
+  String _theTaskName = '';
+  String _theTaskDetail = '';
+  String _theTaskDate;
+  String _theTaskTime;
+  Tasks theUpdatedTask = Tasks();
   String _setTimeText = 'Set Time';
   DateTime _selectedDate;
   TimeOfDay _selectedTime = nowTime;
   String _chipDateText;
   String _chipTimeText;
+
+  // TextEditingController _taskNameController = TextEditingController();
+  // TextEditingController _taskDetailController = TextEditingController();
 
   dynamic _showDatePicker(BuildContext buildContext) async {
     DateTime pickedDate = await showRoundedDatePicker(
@@ -78,24 +94,47 @@ class _EditSpecificTaskPageState extends State<EditSpecificTaskPage> {
 
   @override
   void initState() {
-    if (widget.task != null) {
-      _taskName = widget.task.taskName;
-      _taskDetails = widget.task.taskDetail;
-      _taskDate = widget.task.taskDate;
-      _taskTime = widget.task.taskTime;
-    }
+    _setTheTaskFields();
     super.initState();
+  }
+
+  _setTheTaskFields() {
+    setState(() {
+      _theTaskStatus = widget.theTask.taskStatus;
+      _theTaskName = widget.theTask.taskName;
+      _theTaskDetail = widget.theTask.taskDetail;
+      _theTaskDate = widget.theTask.taskDate;
+      _theTaskTime = widget.theTask.taskTime;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        DatabaseHelper.instance.updateTask(widget.task);
+        theUpdatedTask = Tasks(
+          taskName: _theTaskName,
+          taskDetail: _theTaskDetail,
+          taskDate: _theTaskDate,
+          taskTime: _theTaskTime,
+        );
+        theUpdatedTask.taskStatus = _theTaskStatus;
+        theUpdatedTask.taskId = widget.theTask.taskId;
+        DatabaseHelper.instance.updateTask(theUpdatedTask);
+        widget.updateTask;
         return true;
       },
       child: Scaffold(
-        appBar: AppBar(),
+        appBar: AppBar(
+          actions: [
+            IconButton(
+              icon: Icon(Icons.delete),
+              onPressed: () {
+                // DatabaseHelper.instance.deleteTask(widget.theTask.taskId);
+              },
+            ),
+          ],
+        ),
         body: ListView(
           children: [
             _listDropDown(),
@@ -104,6 +143,19 @@ class _EditSpecificTaskPageState extends State<EditSpecificTaskPage> {
             _taskDateAndTime(),
             _addSubtask(),
           ],
+        ),
+        bottomNavigationBar: BottomAppBar(
+          child: TextButton(
+            onPressed: () {
+              (_theTaskStatus == 0) ? _theTaskStatus = 1 : _theTaskStatus = 0;
+              DatabaseHelper.instance.updateTask(theUpdatedTask);
+              widget.updateTask;
+              // Navigator.pop(context);
+            },
+            child: (_theTaskStatus == 0)
+                ? Text('Mark completed')
+                : Text('Mark uncompleted'),
+          ),
         ),
       ),
     );
@@ -122,8 +174,12 @@ class _EditSpecificTaskPageState extends State<EditSpecificTaskPage> {
   _taskTitle() {
     return ListTile(
       title: TextFormField(
+        // controller: _taskNameController,
         maxLines: null,
-        initialValue: _taskName,
+        initialValue: _theTaskName,
+        onChanged: (value) {
+          _theTaskName = value;
+        },
         decoration: InputDecoration.collapsed(
           hintText: 'Enter title',
         ),
@@ -135,8 +191,12 @@ class _EditSpecificTaskPageState extends State<EditSpecificTaskPage> {
     return ListTile(
       leading: Icon(Icons.sort),
       title: TextFormField(
+        // controller: _taskDetailController,
         maxLines: null,
-        initialValue: _taskDetails,
+        initialValue: _theTaskDetail,
+        onChanged: (value) {
+          _theTaskDetail = value;
+        },
         decoration: InputDecoration.collapsed(
           hintText: 'Enter title',
         ),

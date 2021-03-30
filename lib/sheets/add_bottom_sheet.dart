@@ -100,8 +100,6 @@ class _AddBottomSheetState extends State<AddBottomSheet> {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // _newTaskTextField(),
-          // _addDetailsTextField(),
           _newTaskAndDetails(), //TODO : check for bugs
           _selectedDateAndTimeChip(),
           _buttonsRow(), //TODO : must check different ways to creat a task
@@ -252,11 +250,8 @@ class _AddBottomSheetState extends State<AddBottomSheet> {
                 taskName: _newTaskInput.text,
                 taskDetail: _addDetailsInput.text,
                 //taskDate: DateTime.parse(_chipDateText),
-                taskDate: _selectedDate,
-                taskTime: TimeOfDay(
-                  hour: int.parse(_chipTimeText.split(":")[0]),
-                  minute: int.parse(_chipTimeText.split(":")[1]),
-                ),
+                taskDate: _selectedDate.toString(),
+                taskTime: _chipTimeText,
               );
               DatabaseHelper.instance.insertTask(newTask);
               widget.updateTasksList;
