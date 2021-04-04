@@ -23,6 +23,7 @@ class DatabaseHelper {
   String listsTable = 'lists_table';
   String colListId = 'listId';
   String colListName = 'listName';
+  String colListStatus = 'listStatus';
 
   ///  -------------------------    `Tasks` table    --------------------------
   // listId | taskId | taskStatus | taskName | taskDetail | taskDate | taskTime
@@ -85,7 +86,8 @@ class DatabaseHelper {
       '''
         CREATE TABLE $listsTable(
           $colListId INTEGER PRIMARY KEY AUTOINCREMENT,
-          $colListName TEXT
+          $colListName TEXT,
+          $colListStatus INTEGER
           )
       ''',
     );
@@ -100,7 +102,11 @@ class DatabaseHelper {
           $colTaskName TEXT,
           $colTaskDetail TEXT,
           $colTaskDate TEXT,
-          $colTaskTime TEXT
+          $colTaskTime TEXT,
+          FOREIGN KEY ($colListId)
+          REFERENCES $listsTable ($colListId) 
+          ON UPDATE CASCADE
+          ON DELETE CASCADE
           )
       ''',
     );
@@ -115,7 +121,11 @@ class DatabaseHelper {
           $colSubTaskName TEXT,
           $colSubTaskDetail TEXT,
           $colSubTaskDate TEXT,
-          $colSubTaskTime TEXT
+          $colSubTaskTime TEXT,
+          FOREIGN KEY ($colTaskId)
+          REFERENCES $tasksTable ($colTaskId) 
+          ON UPDATE CASCADE
+          ON DELETE CASCADE
         )
       ''',
     );

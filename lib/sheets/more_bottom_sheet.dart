@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:google_task/helpers/database_helper.dart';
+import 'package:google_task/pages/creat_list_page.dart';
+import 'package:google_task/pages/edit_specific_list_page.dart';
 import 'package:google_task/res.dart';
 
 class MoreBottomSheet extends StatefulWidget {
+  final currentList;
+
+  MoreBottomSheet({this.currentList});
   @override
   _MoreBottomSheetState createState() => _MoreBottomSheetState();
 }
@@ -72,6 +78,18 @@ class _MoreBottomSheetState extends State<MoreBottomSheet> {
           color: myTaskTextColor,
         ),
       ),
+      onTap: () {
+        Navigator.pop(context);
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (_) => EditSpecificListPage(
+                    currentList: widget.currentList,
+                  )),
+        ).then((value) => this.setState(() {
+              DatabaseHelper.instance.getListsList();
+            }));
+      },
     );
   }
 

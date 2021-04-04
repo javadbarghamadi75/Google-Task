@@ -1,13 +1,11 @@
-import 'package:flutter/material.dart';
-
 class SubTasks {
   int taskId;
   int subTaskId;
   int subTaskStatus;
   String subTaskName;
   String subTaskDetail;
-  DateTime subTaskDate;
-  TimeOfDay subTaskTime;
+  String subTaskDate;
+  String subTaskTime;
 
   SubTasks({
     this.taskId,
@@ -38,8 +36,8 @@ class SubTasks {
     map['subTaskStatus'] = subTaskStatus;
     map['subTaskName'] = subTaskName;
     map['subTaskDetail'] = subTaskDetail;
-    map['subTaskDate'] = subTaskDate.toIso8601String();
-    map['subTaskTime'] = subTaskTime.toString();
+    map['subTaskDate'] = subTaskDate;
+    map['subTaskTime'] = subTaskTime;
     return map;
   }
 
@@ -53,13 +51,8 @@ class SubTasks {
       subTaskStatus: map['subTaskStatus'],
       subTaskName: map['subTaskName'],
       subTaskDetail: map['subTaskDetail'],
-      subTaskDate: DateTime.parse(map['subTaskDate']),
-      subTaskTime: TimeOfDay(
-        hour: int.parse(map['subTaskTime'].split(":")[0]),
-        minute: int.parse(
-          map['subTaskTime'].split(":")[1],
-        ),
-      ),
+      subTaskDate: map['subTaskDate'],
+      subTaskTime: map['subTaskTime'],
     );
   }
 }

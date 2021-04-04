@@ -4,17 +4,30 @@ import 'package:google_task/models/lists_model.dart';
 import 'package:google_task/res.dart';
 import 'package:google_task/sheets/menu_bottom_sheet.dart';
 
-class CreatListPage extends StatefulWidget {
-  final Function updateListsList;
+class EditSpecificListPage extends StatefulWidget {
+  final Lists currentList;
 
-  CreatListPage({this.updateListsList});
+  EditSpecificListPage({this.currentList});
 
   @override
-  _CreatListPageState createState() => _CreatListPageState();
+  _EditSpecificListPageState createState() => _EditSpecificListPageState();
 }
 
-class _CreatListPageState extends State<CreatListPage> {
+class _EditSpecificListPageState extends State<EditSpecificListPage> {
   TextEditingController textEditingController = TextEditingController();
+  Lists _renamedList;
+
+  @override
+  void initState() {
+    _setTheListNewName();
+    super.initState();
+  }
+
+  _setTheListNewName() {
+    setState(() {
+      _renamedList = widget.currentList;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,22 +62,13 @@ class _CreatListPageState extends State<CreatListPage> {
               //   newTaskAndDetailsList: _newTaskAndDetailsList,
               //   selectedDateAndTimeChipList: _selectedDateAndTimeChipList,
               // );
-              if (textEditingController.text == null ||
-                  textEditingController.text == '') {
-                Navigator.pop(context);
-              } else {
-                Lists newListName =
-                    Lists(listName: textEditingController.text, listStatus: 0);
-                DatabaseHelper.instance.insertList(newListName);
-                widget.updateListsList;
-                Navigator.pop(context);
-                showModalBottomSheet(
-                  context: context,
-                  builder: (build) => MenuBottomSheet(),
-                  backgroundColor: Colors.transparent,
-                  isScrollControlled: false,
-                );
-              }
+              Lists renamedList = Lists(
+                listName: _renamedList.listName,
+                listStatus: 1,
+              );
+              renamedList.listId = widget.currentList.listId;
+              DatabaseHelper.instance.updateList(renamedList);
+              // Navigator.pop(context);
               // widget.updateListsList;
               // Navigator.push(
               //   context,
@@ -88,8 +92,8 @@ class _CreatListPageState extends State<CreatListPage> {
         ],
       ),
       body: Form(
-        child: TextField(
-          controller: textEditingController,
+        child: TextFormField(
+          initialValue: _renamedList.listName,
         ),
       ),
     );

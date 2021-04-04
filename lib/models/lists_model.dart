@@ -1,14 +1,17 @@
 class Lists {
   int listId;
   String listName;
+  int listStatus;
 
   Lists({
     this.listName,
+    this.listStatus,
   });
 
   Lists.withId({
     this.listId,
     this.listName,
+    this.listStatus,
   });
 
   // to store data in database we need a toMap method
@@ -18,6 +21,7 @@ class Lists {
       map['listId'] = listId;
     }
     map['listName'] = listName;
+    map['listStatus'] = listStatus;
     return map;
   }
 
@@ -28,6 +32,7 @@ class Lists {
     return Lists.withId(
       listId: map['listId'],
       listName: map['listName'],
+      listStatus: map['listStatus'],
     );
   }
 }

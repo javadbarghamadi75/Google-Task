@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_task/helpers/database_helper.dart';
 import 'package:google_task/models/lists_model.dart';
 import 'package:google_task/pages/creat_list_page.dart';
+import 'package:google_task/pages/home_page.dart';
 import 'package:google_task/res.dart';
 
 class MenuBottomSheet extends StatefulWidget {
@@ -12,6 +13,10 @@ class MenuBottomSheet extends StatefulWidget {
 class _MenuBottomSheetState extends State<MenuBottomSheet> {
   ImageProvider<Object> _userProfileImage;
   Future<List<Lists>> _listsList;
+  static int _selectedListId;
+  Lists selectedList;
+  static int _listIsSelected = 0;
+  // static var selectedIndex;
 
   @override
   void initState() {
@@ -20,9 +25,9 @@ class _MenuBottomSheetState extends State<MenuBottomSheet> {
   }
 
   _updateListsList() {
-    setState(() {
-      _listsList = DatabaseHelper.instance.getListsList();
-    });
+    // setState(() {
+    _listsList = DatabaseHelper.instance.getListsList();
+    // });
   }
 
   @override
@@ -95,18 +100,18 @@ class _MenuBottomSheetState extends State<MenuBottomSheet> {
   }
 
   _listOfLists() {
-    return FutureBuilder(
+    return FutureBuilder<List<Lists>>(
         future: DatabaseHelper.instance.getListsList(),
-        builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+        builder: (BuildContext context, AsyncSnapshot<List<Lists>> snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          }
           if (snapshot.connectionState == ConnectionState.done) {
-            if (snapshot.data.length == 0) {
-              Lists newList = Lists(listName: 'My Tasks');
-              DatabaseHelper.instance.insertList(newList);
-              _updateListsList();
-              return _list(newList);
-            } else {
+            if (snapshot.hasData && snapshot.data.length > 0) {
               return ListView.builder(
-                physics: const NeverScrollableScrollPhysics(),
+                physics: NeverScrollableScrollPhysics(),
                 shrinkWrap: true,
                 itemCount: snapshot.data.length,
                 itemBuilder: (BuildContext buildContext, int index) {
@@ -114,6 +119,14 @@ class _MenuBottomSheetState extends State<MenuBottomSheet> {
                   return _list(snapshot.data[index]);
                 },
               );
+            } else {
+              Lists newList = Lists(
+                listName: 'My Tasks',
+                listStatus: _listIsSelected,
+              );
+              DatabaseHelper.instance.insertList(newList);
+              _updateListsList();
+              return _list(newList);
             }
           }
           return Text('Connection State : not Done!');
@@ -132,18 +145,12 @@ class _MenuBottomSheetState extends State<MenuBottomSheet> {
               right: padding16,
               bottom: padding16,
             ),
-      child: GestureDetector(
-        onTap: () {
-          print(
-              'list tapped!  |  TODO : onTap must changes the list at home page');
-          print('کیلپ ررکت باید بعد از آنتپ اتفاق بیفته با آیدی تپ شده');
-        },
-        child: ClipRRect(
-          borderRadius: BorderRadius.only(
-            topRight: Radius.circular(bigCornerRadius),
-            bottomRight: Radius.circular(bigCornerRadius),
-          ),
-          child: ListTile(
+      child: ClipRRect(
+        borderRadius: BorderRadius.only(
+          topRight: Radius.circular(bigCornerRadius),
+          bottomRight: Radius.circular(bigCornerRadius),
+        ),
+        child: ListTile(
             title: Text(
               theList.listName,
               style: TextStyle(
@@ -156,10 +163,18 @@ class _MenuBottomSheetState extends State<MenuBottomSheet> {
               backgroundImage: null,
               backgroundColor: transparentColor,
             ),
-            selected: true,
-            selectedTileColor: saveButtonColor.withOpacity(0.1),
-          ),
-        ),
+            onTap: () {
+              setState(() {
+                theList.listStatus = 1;
+                _selectedListId = theList.listId;
+                selectedList = theList;
+              });
+              // HomePage(_selectedListName);
+              // Navigator.pop(context, _selectedListName);
+              Navigator.pop(context, selectedList);
+            },
+            selected: _selectedListId == theList.listId,
+            selectedTileColor: saveButtonColor.withOpacity(0.1)),
       ),
     );
   }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_rounded_date_picker/rounded_picker.dart';
 import 'package:google_task/helpers/database_helper.dart';
+import 'package:google_task/models/lists_model.dart';
+import 'package:google_task/models/subtasks_model.dart';
 import 'package:google_task/models/tasks_model.dart';
 import 'package:google_task/pages/home_page.dart';
 import 'package:google_task/res.dart';
@@ -41,8 +43,12 @@ class _EditSpecificTaskPageState extends State<EditSpecificTaskPage> {
   String _chipDateText;
   String _chipTimeText;
 
-  // TextEditingController _taskNameController = TextEditingController();
+  TextEditingController _enterSubTaskNameController = TextEditingController();
   // TextEditingController _taskDetailController = TextEditingController();
+  //
+  List<String> listNames = [];
+  List<Lists> listOfLists;
+  String _selectedList = '';
 
   dynamic _showDatePicker(BuildContext buildContext) async {
     DateTime pickedDate = await showRoundedDatePicker(
@@ -92,14 +98,46 @@ class _EditSpecificTaskPageState extends State<EditSpecificTaskPage> {
     _showDatePicker(buildContext);
   }
 
+  Future<List<SubTasks>> _subTasksList;
+
   @override
   void initState() {
+    // setState(() {
+    //   _selectedList = listNames[widget.theTask.listId];
+    // });
+    // _theTaskStatus = widget.theTask.taskStatus;
+    // _theTaskName = widget.theTask.taskName;
+    // _theTaskDetail = widget.theTask.taskDetail;
+    // _theTaskDate = widget.theTask.taskDate;
+    // _theTaskTime = widget.theTask.taskTime;
+    _getListNames();
     _setTheTaskFields();
+    _updateSubTasksList();
+    _updateTask();
     super.initState();
+  }
+
+  _getListNames() async {
+    await DatabaseHelper.instance.getListsList().then((value) => value.forEach(
+          (element) {
+            listNames.add(element.listName);
+          },
+        ));
+    // listOfLists.forEach((element) {
+    //   listNames.add(element.listName);
+    // });
+    print('listNames : $listNames');
+  }
+
+  _updateSubTasksList() {
+    setState(() {
+      _subTasksList = DatabaseHelper.instance.getSubTasksList();
+    });
   }
 
   _setTheTaskFields() {
     setState(() {
+      print('taskStatus set : ${widget.theTask.taskStatus}');
       _theTaskStatus = widget.theTask.taskStatus;
       _theTaskName = widget.theTask.taskName;
       _theTaskDetail = widget.theTask.taskDetail;
@@ -108,17 +146,25 @@ class _EditSpecificTaskPageState extends State<EditSpecificTaskPage> {
     });
   }
 
+  _updateTask() {
+    setState(() {
+      DatabaseHelper.instance.updateTask(theUpdatedTask);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
         theUpdatedTask = Tasks(
+          taskStatus: _theTaskStatus,
           taskName: _theTaskName,
           taskDetail: _theTaskDetail,
           taskDate: _theTaskDate,
           taskTime: _theTaskTime,
         );
-        theUpdatedTask.taskStatus = _theTaskStatus;
+        print('taskStatus ooo : ${_theTaskStatus}');
+        // theUpdatedTask.taskStatus = _theTaskStatus;
         theUpdatedTask.taskId = widget.theTask.taskId;
         DatabaseHelper.instance.updateTask(theUpdatedTask);
         widget.updateTask;
@@ -130,7 +176,8 @@ class _EditSpecificTaskPageState extends State<EditSpecificTaskPage> {
             IconButton(
               icon: Icon(Icons.delete),
               onPressed: () {
-                // DatabaseHelper.instance.deleteTask(widget.theTask.taskId);
+                DatabaseHelper.instance.deleteTask(widget.theTask.taskId);
+                Navigator.pop(context);
               },
             ),
           ],
@@ -141,16 +188,22 @@ class _EditSpecificTaskPageState extends State<EditSpecificTaskPage> {
             _taskTitle(),
             _taskSubTitle(),
             _taskDateAndTime(),
-            _addSubtask(),
+            _subTasksListView(),
+            _addSubTask(),
           ],
         ),
         bottomNavigationBar: BottomAppBar(
           child: TextButton(
             onPressed: () {
-              (_theTaskStatus == 0) ? _theTaskStatus = 1 : _theTaskStatus = 0;
+              (_theTaskStatus == 1) ? _theTaskStatus = 0 : _theTaskStatus = 1;
+              print('taskStatus ttt : ${_theTaskStatus}');
+              // theUpdatedTask.taskId = widget.theTask.taskId;   ..  causing ui errorssssssssssss
+              // theUpdatedTask.taskId = ;
+              theUpdatedTask.taskStatus = _theTaskStatus;
               DatabaseHelper.instance.updateTask(theUpdatedTask);
-              widget.updateTask;
+              print('taskStatus zzz : ${theUpdatedTask.taskStatus}');
               // Navigator.pop(context);
+              // _updateTask();
             },
             child: (_theTaskStatus == 0)
                 ? Text('Mark completed')
@@ -164,9 +217,20 @@ class _EditSpecificTaskPageState extends State<EditSpecificTaskPage> {
   _listDropDown() {
     return ListTile(
       title: DropdownButton(
-        items: null,
-        onChanged: null,
-        value: 'My Task',
+        underline: Container(),
+        hint: Text('List'),
+        items: listNames.map((String value) {
+          return new DropdownMenuItem<String>(
+            value: value,
+            child: Text(value),
+          );
+        }).toList(),
+        // value: widget.theTask.listId,
+        onChanged: (newValue) {
+          setState(() {
+            _selectedList = newValue;
+          });
+        },
       ),
     );
   }
@@ -252,15 +316,83 @@ class _EditSpecificTaskPageState extends State<EditSpecificTaskPage> {
     );
   }
 
-  _addSubtask() {
-    return ListTile(
-      leading: Icon(Icons.subdirectory_arrow_right),
-      title: TextField(
-        maxLines: null,
-        decoration: InputDecoration.collapsed(
-          hintText: 'Add subtasks',
-        ),
+  _subTasksListView() {
+    return SingleChildScrollView(
+      child: FutureBuilder(
+        future: DatabaseHelper.instance.getSubTasksList(),
+        builder:
+            (BuildContext context, AsyncSnapshot<List<SubTasks>> snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+          if (snapshot.connectionState == ConnectionState.done) {
+            if (snapshot.hasData && snapshot.data.length > 0) {
+              return ListView.builder(
+                physics: NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                itemCount: snapshot.data.length,
+                itemBuilder: (BuildContext buildContext, int index) {
+                  if (snapshot.data[index].taskId == widget.theTask.taskId) {
+                    return _subTaskTile(snapshot.data[index]);
+                  }
+                  return Container();
+                },
+              );
+            } else {
+              return Container();
+            }
+          } else {
+            return Text('Connection State : not Done!?');
+          }
+        },
       ),
+    );
+  }
+
+  _subTaskTile(SubTasks theSubTask) {
+    return ListTile(
+      leading: Checkbox(
+        value: true,
+        onChanged: (value) {},
+      ),
+      title: TextFormField(
+        initialValue: theSubTask.subTaskName,
+        decoration: InputDecoration.collapsed(hintText: null),
+      ),
+      trailing: IconButton(
+        icon: Icon(Icons.close),
+        onPressed: () {},
+      ),
+    );
+  }
+
+  _addSubTask() {
+    return Column(
+      children: [
+        ListTile(
+          title: TextField(
+            controller: _enterSubTaskNameController,
+            maxLines: null,
+            decoration: InputDecoration.collapsed(
+              hintText: 'Enter title',
+            ),
+          ),
+        ),
+        TextButton(
+          onPressed: () {
+            SubTasks createdSubTask = SubTasks(
+              subTaskName: _enterSubTaskNameController.text,
+              taskId: widget.theTask.taskId,
+            );
+            DatabaseHelper.instance.insertSubTask(createdSubTask);
+            _updateSubTasksList();
+            _enterSubTaskNameController.text = '';
+          },
+          child: Text('Add subtasks'),
+        ),
+      ],
     );
   }
 }

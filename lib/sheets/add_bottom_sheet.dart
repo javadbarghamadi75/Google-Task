@@ -45,7 +45,7 @@ class _AddBottomSheetState extends State<AddBottomSheet> {
         ),
       ),
       onTapActionButton: () {
-        Navigator.pop(context);
+        // Navigator.pop(context);
         _showTimePicker(buildContext);
       },
     );
@@ -253,6 +253,7 @@ class _AddBottomSheetState extends State<AddBottomSheet> {
                 taskDate: _selectedDate.toString(),
                 taskTime: _chipTimeText,
               );
+              print('taskStatus : ${newTask.taskStatus}');
               DatabaseHelper.instance.insertTask(newTask);
               widget.updateTasksList;
               Navigator.pop(context);

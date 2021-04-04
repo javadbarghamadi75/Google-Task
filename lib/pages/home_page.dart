@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_task/helpers/database_helper.dart';
+import 'package:google_task/models/lists_model.dart';
 import 'package:google_task/models/tasks_model.dart';
 import 'package:google_task/pages/edit_specific_task_page.dart';
 import 'package:google_task/res.dart';
@@ -9,23 +10,31 @@ import 'package:google_task/sheets/more_bottom_sheet.dart';
 import 'package:intl/intl.dart';
 
 class HomePage extends StatefulWidget {
+  // final String
+  //     selectedListName; //ino ezafe kardam ba null dar main ta check shavad heder ba in va titlesh
+
+  // HomePage(this.selectedListName);
+
   @override
   _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  Future<List<Tasks>> _tasksList;
+  // Future<List<Tasks>> _tasksList;
   final DateFormat _dateFormat = DateFormat('EEEE, d MMMM');
+  // TextEditingController _homePageTitleController = TextEditingController();
+  static Lists selectedListFromMenu;
+  var selectedList;
 
   @override
   void initState() {
-    _updateTasksList();
+    selectedList = _updateTasksList();
     super.initState();
   }
 
   _updateTasksList() {
     setState(() {
-      _tasksList = DatabaseHelper.instance.getTasksList();
+      DatabaseHelper.instance.getTasksList();
     });
   }
 
@@ -47,14 +56,25 @@ class _HomePageState extends State<HomePage> {
           left: padding38,
           top: padding28,
         ),
-        child: Text(
-          'My Tasks',
-          style: TextStyle(
-            color: myTaskTextColor,
-            fontSize: textSize34,
-            fontFamily: 'Product Sans',
-          ),
-        ),
+        child: (selectedListFromMenu == null)
+            ? Text(
+                'My Tasks',
+                // controller: _homePageTitleController,
+                style: TextStyle(
+                  color: myTaskTextColor,
+                  fontSize: textSize34,
+                  fontFamily: 'Product Sans',
+                ),
+              )
+            : Text(
+                selectedListFromMenu.listName,
+                // controller: _homePageTitleController,
+                style: TextStyle(
+                  color: myTaskTextColor,
+                  fontSize: textSize34,
+                  fontFamily: 'Product Sans',
+                ),
+              ),
       ),
       backgroundColor: scaffoldBackgroundColor,
       toolbarHeight: toolbarHeight70,
@@ -74,15 +94,18 @@ class _HomePageState extends State<HomePage> {
           }
           print('snapshot.connectionState : ${snapshot.connectionState}');
           if (snapshot.connectionState == ConnectionState.done) {
-            if (snapshot.hasData && snapshot.data.length > 0) {
+            List<Tasks> filteredTasks = snapshot.data
+                .where(
+                    (element) => element.listId == selectedListFromMenu?.listId)
+                .toList();
+            if (filteredTasks != null && filteredTasks.length > 0) {
               print('data : ${snapshot.data.toString()}');
-
               return ListView.builder(
                 shrinkWrap: true,
                 itemCount: snapshot.data.length,
                 itemBuilder: (BuildContext buildContext, int index) {
-                  print('${snapshot.data[index].listId}');
-                  return _task(snapshot.data[index]);
+                  print('task status : ${snapshot.data[index].taskStatus}');
+                  return _task(filteredTasks[index]);
                 },
               );
             } else {
@@ -104,6 +127,7 @@ class _HomePageState extends State<HomePage> {
           context,
           MaterialPageRoute(
             builder: (_) {
+              print('taskStatus : ${theTask.taskStatus}');
               return EditSpecificTaskPage(
                 theTask: theTask,
                 updateTask: DatabaseHelper.instance.getTasksList,
@@ -211,7 +235,7 @@ class _HomePageState extends State<HomePage> {
         ),
         backgroundColor: Colors.transparent,
         isScrollControlled: true,
-      ).then((_) => this.setState(() {})),
+      ).then((value) => this.setState(() {})),
       child: Icon(
         Icons.add,
         size: iconSize42,
@@ -241,7 +265,11 @@ class _HomePageState extends State<HomePage> {
                 builder: (build) => MenuBottomSheet(),
                 backgroundColor: Colors.transparent,
                 isScrollControlled: false,
-              );
+              ).then((value) => this.setState(() {
+                    DatabaseHelper.instance.getListsList();
+                    selectedListFromMenu = value;
+                    print(selectedListFromMenu);
+                  }));
             },
           ),
           IconButton(
@@ -249,10 +277,12 @@ class _HomePageState extends State<HomePage> {
             onPressed: () {
               showModalBottomSheet(
                 context: buildContext,
-                builder: (build) => MoreBottomSheet(),
+                builder: (build) => MoreBottomSheet(
+                  currentList: selectedListFromMenu,
+                ),
                 backgroundColor: Colors.transparent,
                 // isScrollControlled: true,
-              );
+              ).then((value) => this.setState(() {}));
             },
           ),
         ],
