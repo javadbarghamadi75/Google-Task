@@ -17,6 +17,8 @@ class _MenuBottomSheetState extends State<MenuBottomSheet> {
   Lists selectedList;
   static int _listIsSelected = 0;
   // static var selectedIndex;
+  int listLength = 0;
+  bool defaultListIsSelected = false;
 
   @override
   void initState() {
@@ -103,6 +105,10 @@ class _MenuBottomSheetState extends State<MenuBottomSheet> {
     return FutureBuilder<List<Lists>>(
         future: DatabaseHelper.instance.getListsList(),
         builder: (BuildContext context, AsyncSnapshot<List<Lists>> snapshot) {
+          listLength = snapshot.data?.length;
+          if (listLength == 1) {
+            defaultListIsSelected = true;
+          }
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(
               child: CircularProgressIndicator(),
@@ -165,7 +171,9 @@ class _MenuBottomSheetState extends State<MenuBottomSheet> {
             ),
             onTap: () {
               setState(() {
-                theList.listStatus = 1;
+                (theList.listStatus == 0)
+                    ? theList.listStatus = 1
+                    : theList.listStatus = 0;
                 _selectedListId = theList.listId;
                 selectedList = theList;
               });
@@ -173,7 +181,11 @@ class _MenuBottomSheetState extends State<MenuBottomSheet> {
               // Navigator.pop(context, _selectedListName);
               Navigator.pop(context, selectedList);
             },
-            selected: _selectedListId == theList.listId,
+            selected: (defaultListIsSelected)
+                ? true
+                : (theList.listStatus == 1)
+                    ? true
+                    : _selectedListId == theList.listId,
             selectedTileColor: saveButtonColor.withOpacity(0.1)),
       ),
     );

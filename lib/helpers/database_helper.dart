@@ -87,7 +87,7 @@ class DatabaseHelper {
         CREATE TABLE $listsTable(
           $colListId INTEGER PRIMARY KEY AUTOINCREMENT,
           $colListName TEXT,
-          $colListStatus INTEGER
+          $colListStatus INTEGER DEFAULT 0
           )
       ''',
     );

@@ -138,7 +138,7 @@ class _HomePageState extends State<HomePage> {
               );
             },
           ),
-        ).then((value) => _updateTasksList());
+        ).then((value) => this.setState(() {}));
       },
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
