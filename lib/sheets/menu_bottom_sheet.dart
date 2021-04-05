@@ -34,33 +34,42 @@ class _MenuBottomSheetState extends State<MenuBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: scaffoldBackgroundColor,
-        borderRadius: BorderRadius.only(
-          topRight: Radius.circular(smallCornerRadius),
-          topLeft: Radius.circular(smallCornerRadius),
+    return WillPopScope(
+      onWillPop: () async {
+        print('pop Scope');
+        print('popscope print : $selectedList');
+        selectedList;
+        Navigator.pop(context, selectedList);
+        return true;
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: scaffoldBackgroundColor,
+          borderRadius: BorderRadius.only(
+            topRight: Radius.circular(smallCornerRadius),
+            topLeft: Radius.circular(smallCornerRadius),
+          ),
         ),
-      ),
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          verticalDirection: VerticalDirection.down,
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _userInfoRow(), //TODO : how about login with Google Account
-            _divider(),
-            _listOfLists(), //TODO : must be a ListView.builder
-            _divider(),
-            _createNewList(), //TODO : check some added new list (modalbottomsheet height/scroll/etc)
-            _divider(),
-            _helpAndFeedback(), //TODO : must be a link
-            _divider(),
-            _opensourceLicenses(), //TODO : must be a link
-            _divider(),
-            _privacyPolicy(), //TODO : must be a link
-          ],
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            verticalDirection: VerticalDirection.down,
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _userInfoRow(), //TODO : how about login with Google Account
+              _divider(),
+              _listOfLists(), //TODO : must be a ListView.builder
+              _divider(),
+              _createNewList(), //TODO : check some added new list (modalbottomsheet height/scroll/etc)
+              _divider(),
+              _helpAndFeedback(), //TODO : must be a link
+              _divider(),
+              _opensourceLicenses(), //TODO : must be a link
+              _divider(),
+              _privacyPolicy(), //TODO : must be a link
+            ],
+          ),
         ),
       ),
     );
@@ -179,6 +188,7 @@ class _MenuBottomSheetState extends State<MenuBottomSheet> {
               });
               // HomePage(_selectedListName);
               // Navigator.pop(context, _selectedListName);
+              print('ontap print : $selectedList');
               Navigator.pop(context, selectedList);
             },
             selected: (defaultListIsSelected)

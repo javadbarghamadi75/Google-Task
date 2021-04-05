@@ -259,13 +259,14 @@ class _HomePageState extends State<HomePage> {
         children: [
           IconButton(
             icon: Icon(Icons.menu),
-            onPressed: () {
-              showModalBottomSheet(
+            onPressed: () async {
+              await showModalBottomSheet<Lists>(
                 context: buildContext,
                 builder: (build) => MenuBottomSheet(),
                 backgroundColor: Colors.transparent,
                 isScrollControlled: false,
               ).then((value) => this.setState(() {
+                    print('value : ${value?.listId}');
                     DatabaseHelper.instance.getListsList();
                     selectedListFromMenu = value;
                     print(selectedListFromMenu);
@@ -274,15 +275,19 @@ class _HomePageState extends State<HomePage> {
           ),
           IconButton(
             icon: Icon(Icons.more_vert),
-            onPressed: () {
-              showModalBottomSheet(
+            onPressed: () async {
+              await showModalBottomSheet<Lists>(
                 context: buildContext,
                 builder: (build) => MoreBottomSheet(
                   currentList: selectedListFromMenu,
                 ),
                 backgroundColor: Colors.transparent,
                 // isScrollControlled: true,
-              ).then((value) => this.setState(() {}));
+              )
+                  .then(
+                    (value) => print('value : ${value.listId}'),
+                  )
+                  .whenComplete(() => _updateTasksList());
             },
           ),
         ],
