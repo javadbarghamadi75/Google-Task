@@ -64,7 +64,7 @@ class _EditSpecificListPageState extends State<EditSpecificListPage> {
               // );
               Lists renamedList = Lists(
                 listName: _renamedList.listName,
-                listStatus: 1,
+                listStatus: true,
               );
               renamedList.listId = widget.currentList.listId;
               DatabaseHelper.instance.updateList(renamedList);

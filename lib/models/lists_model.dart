@@ -1,7 +1,7 @@
 class Lists {
   int listId;
   String listName;
-  int listStatus;
+  bool listStatus;
 
   Lists({
     this.listName,
@@ -21,7 +21,7 @@ class Lists {
       map['listId'] = listId;
     }
     map['listName'] = listName;
-    map['listStatus'] = listStatus;
+    map['listStatus'] = listStatus == true ? 1 : 0;
     return map;
   }
 
@@ -32,7 +32,7 @@ class Lists {
     return Lists.withId(
       listId: map['listId'],
       listName: map['listName'],
-      listStatus: map['listStatus'],
+      listStatus: map['listStatus'] == 1 ? true : false,
     );
   }
 }

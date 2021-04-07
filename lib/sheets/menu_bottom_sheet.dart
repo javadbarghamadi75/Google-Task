@@ -6,6 +6,10 @@ import 'package:google_task/pages/home_page.dart';
 import 'package:google_task/res.dart';
 
 class MenuBottomSheet extends StatefulWidget {
+  // final Lists newCreatedList;
+
+  // MenuBottomSheet({this.newCreatedList});
+
   @override
   _MenuBottomSheetState createState() => _MenuBottomSheetState();
 }
@@ -13,17 +17,30 @@ class MenuBottomSheet extends StatefulWidget {
 class _MenuBottomSheetState extends State<MenuBottomSheet> {
   ImageProvider<Object> _userProfileImage;
   Future<List<Lists>> _listsList;
-  static int _selectedListId;
-  Lists selectedList;
+  static Lists selectedList;
+  static int selectedListId;
+  static String selectedListName;
   static int _listIsSelected = 0;
+  static int newCreatedList;
+  static int lastIndex;
+  List<Lists> lists = [];
   // static var selectedIndex;
   int listLength = 0;
   bool defaultListIsSelected = false;
 
   @override
   void initState() {
+    print('initState');
+    // _selectList(listToSelect: lastIndex);
+    // setState(() {
+    // selectedList = widget.newCreatedList == null ? null : widget.newCreatedList;
+    // });
     _updateListsList();
     super.initState();
+  }
+
+  bool _selectList({int listToSelect}) {
+    if (selectedListId == lastIndex) return true;
   }
 
   _updateListsList() {
@@ -38,7 +55,7 @@ class _MenuBottomSheetState extends State<MenuBottomSheet> {
       onWillPop: () async {
         print('pop Scope');
         print('popscope print : $selectedList');
-        selectedList;
+        // selectedList;
         Navigator.pop(context, selectedList);
         return true;
       },
@@ -125,23 +142,33 @@ class _MenuBottomSheetState extends State<MenuBottomSheet> {
           }
           if (snapshot.connectionState == ConnectionState.done) {
             if (snapshot.hasData && snapshot.data.length > 0) {
+              lists.addAll(
+                snapshot.data.where((element) => element.listStatus == true),
+              );
+              // selectedList =
+              // lists.singleWhere((element) => element.listStatus == true);
               return ListView.builder(
                 physics: NeverScrollableScrollPhysics(),
                 shrinkWrap: true,
                 itemCount: snapshot.data.length,
                 itemBuilder: (BuildContext buildContext, int index) {
                   print('${snapshot.data[index].listId}');
+                  // lastIndex = snapshot.data.last;
                   return _list(snapshot.data[index]);
                 },
               );
             } else {
-              Lists newList = Lists(
+              Lists defaultFirstList = Lists(
                 listName: 'My Tasks',
-                listStatus: _listIsSelected,
+                listStatus: true,
               );
-              DatabaseHelper.instance.insertList(newList);
+              DatabaseHelper.instance.insertList(defaultFirstList);
+              // selectedList = defaultFirstList;
+              DatabaseHelper.instance.getListsList();
+
+              // selectedListId = defaultFirstList.listId;
               _updateListsList();
-              return _list(newList);
+              return _list(defaultFirstList);
             }
           }
           return Text('Connection State : not Done!');
@@ -149,6 +176,8 @@ class _MenuBottomSheetState extends State<MenuBottomSheet> {
   }
 
   Widget _list(Lists theList) {
+    // selectedListId = theList.listId;
+    // theList.listStatus = 0;
     return Padding(
       padding: (theList.listId == 1)
           ? EdgeInsets.only(
@@ -166,37 +195,50 @@ class _MenuBottomSheetState extends State<MenuBottomSheet> {
           bottomRight: Radius.circular(bigCornerRadius),
         ),
         child: ListTile(
-            title: Text(
-              theList.listName,
-              style: TextStyle(
-                fontFamily: 'Product Sans',
-                fontSize: textSize16,
-                color: saveButtonColor,
-              ),
+          title: Text(
+            theList.listName,
+            style: TextStyle(
+              fontFamily: 'Product Sans',
+              fontSize: textSize16,
+              color: saveButtonColor,
             ),
-            leading: CircleAvatar(
-              backgroundImage: null,
-              backgroundColor: transparentColor,
-            ),
-            onTap: () {
-              setState(() {
-                (theList.listStatus == 0)
-                    ? theList.listStatus = 1
-                    : theList.listStatus = 0;
-                _selectedListId = theList.listId;
-                selectedList = theList;
-              });
-              // HomePage(_selectedListName);
-              // Navigator.pop(context, _selectedListName);
-              print('ontap print : $selectedList');
-              Navigator.pop(context, selectedList);
-            },
-            selected: (defaultListIsSelected)
-                ? true
-                : (theList.listStatus == 1)
-                    ? true
-                    : _selectedListId == theList.listId,
-            selectedTileColor: saveButtonColor.withOpacity(0.1)),
+          ),
+          leading: CircleAvatar(
+            backgroundImage: null,
+            backgroundColor: transparentColor,
+          ),
+          onTap: () {
+            setState(() {
+              // // (theList.listStatus == false)
+              // //     ? theList.listStatus = true
+              // //     : theList.listStatus = false;
+              // selectedListId = theList.listId;
+              // selectedList = theList;
+              selectedListId = theList.listId;
+              // lastIndex = theList.listId;
+            });
+            // HomePage(_selectedListName);
+            // Navigator.pop(context, _selectedListName);
+            print('ontap print : $selectedList');
+            // if (selectedListId == theList.listId) {
+            //   return null;
+            // } else
+            Navigator.pop(context, selectedList);
+            // Navigator.pop(context, selectedList);
+          },
+          // selected: _selectList(),
+          selected: (defaultListIsSelected)
+              ? true
+              : (theList.listId == lastIndex)
+                  ? true
+                  : selectedListId == theList.listId,
+          // selected: (selectedList.listStatus == 1)?true:,
+          // selected: (theList.listId == selectedList.listId),
+          // selected: selectedListId == theList.listId,
+          // selected: selectedList?.listStatus,
+          // selected: selectedListId == theList.listId,
+          selectedTileColor: saveButtonColor.withOpacity(0.1),
+        ),
       ),
     );
   }
@@ -219,17 +261,27 @@ class _MenuBottomSheetState extends State<MenuBottomSheet> {
           color: myTaskTextColor,
         ),
       ),
-      onTap: () {
+      onTap: () async {
         Navigator.pop(context);
-        Navigator.push(
+        await Navigator.push(
           context,
-          MaterialPageRoute(
+          MaterialPageRoute<int>(
             builder: (_) {
               return CreatListPage(
                 updateListsList: _updateListsList,
               );
             },
           ),
+        ).then(
+          (value) => {
+            print('creatListPage value : $value'),
+            // newCreatedList = value.listId,
+            // selectedListId = newCreatedList,
+            lastIndex = value,
+            lastIndex = lastIndex - 1,
+            print('lastIndex : $lastIndex'),
+            // _list(value),
+          },
         );
       },
     );

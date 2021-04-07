@@ -15,7 +15,7 @@ class CreatListPage extends StatefulWidget {
 
 class _CreatListPageState extends State<CreatListPage> {
   TextEditingController textEditingController = TextEditingController();
-
+  int lastListId;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -42,7 +42,7 @@ class _CreatListPageState extends State<CreatListPage> {
         ),
         actions: [
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               // _newTaskAndDetailsList.add(_newTaskAndDetails());
               // _selectedDateAndTimeChipList.add(_selectedDateAndTimeChip());
               // HomeTasksListView(
@@ -53,11 +53,21 @@ class _CreatListPageState extends State<CreatListPage> {
                   textEditingController.text == '') {
                 Navigator.pop(context);
               } else {
-                Lists newListName =
-                    Lists(listName: textEditingController.text, listStatus: 0);
-                DatabaseHelper.instance.insertList(newListName);
-                widget.updateListsList;
-                Navigator.pop(context);
+                Lists newList = Lists(
+                    listName: textEditingController.text, listStatus: true);
+                DatabaseHelper.instance.insertList(newList);
+                createdListId() async {
+                  Future<int> lastCreatedListId = DatabaseHelper.instance
+                      .getListsList()
+                      .then((value) => value.last.listId);
+                  lastListId = await lastCreatedListId;
+                }
+
+                await createdListId();
+                // MenuBottomSheet(newCreatedList: newList);
+                // widget.updateListsList;
+                Navigator.pop(context, lastListId);
+                print('newList.listId : $lastListId');
                 showModalBottomSheet(
                   context: context,
                   builder: (build) => MenuBottomSheet(),
