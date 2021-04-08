@@ -244,37 +244,53 @@ class DatabaseHelper {
   /// this method returns the `number of changes made`
   /// `---------------------------- UPDATE QUERIES ----------------------------`
   ///  -------------------------    `Lists` table     -------------------------
-  Future<int> updateList(Lists lists) async {
+  Future<int> updateList(Lists list) async {
     Database db = await this.db;
     final int result = await db.update(
       listsTable,
-      lists.toMap(),
+      list.toMap(),
       where: '$colListId = ?',
-      whereArgs: [lists.listId],
+      whereArgs: [list.listId],
+    );
+    return result;
+  }
+
+  // Future<int> updateListById(int id) async {
+  //   Database db = await this.db;
+  //   final int result = await db.update(listsTable, values);
+  // }
+
+  Future<int> updateAllList() async {
+    Database db = await this.db;
+    final int result = await db.rawUpdate(
+      '''
+      UPDATE $listsTable
+      SET $colListStatus = 0
+      ''',
     );
     return result;
   }
 
   ///  -------------------------    `Tasks` table     -------------------------
-  Future<int> updateTask(Tasks tasks) async {
+  Future<int> updateTask(Tasks task) async {
     Database db = await this.db;
     final int result = await db.update(
       tasksTable,
-      tasks.toMap(),
+      task.toMap(),
       where: '$colTaskId = ?',
-      whereArgs: [tasks.taskId],
+      whereArgs: [task.taskId],
     );
     return result;
   }
 
   ///  ------------------------    `SubTasks` table     -----------------------
-  Future<int> updateSubTask(SubTasks subTasks) async {
+  Future<int> updateSubTask(SubTasks subTask) async {
     Database db = await this.db;
     final int result = await db.update(
       subTasksTable,
-      subTasks.toMap(),
+      subTask.toMap(),
       where: '$colSubTaskId = ?',
-      whereArgs: [subTasks.subTaskId],
+      whereArgs: [subTask.subTaskId],
     );
     return result;
   }

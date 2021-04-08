@@ -15,7 +15,27 @@ class CreatListPage extends StatefulWidget {
 
 class _CreatListPageState extends State<CreatListPage> {
   TextEditingController textEditingController = TextEditingController();
-  int lastListId;
+  Lists lastList;
+  int aListIdWithSelectedStatus;
+
+  _getCreatedList() async {
+    Future<Lists> lastCreatedList =
+        DatabaseHelper.instance.getListsList().then((value) => value.last);
+    lastList = await lastCreatedList;
+    // DatabaseHelper.instance.updateAllList();
+    // // DatabaseHelper.instance
+    // //     .getListsList()
+    // //     .then((value) => value.where((element) => element.listStatus == 1));
+    // Future<Lists> aListWithSelectedStatus = DatabaseHelper.instance
+    //     .getListsList()
+    //     .then((value) => value.singleWhere(
+    //           (element) => element.listStatus == 1,
+    //         ));
+    // aListIdWithSelectedStatus =
+    //     await aListWithSelectedStatus.then((value) => value.listId);
+    // print('aListIdWithSelectedStatus : $aListIdWithSelectedStatus');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -51,23 +71,27 @@ class _CreatListPageState extends State<CreatListPage> {
               // );
               if (textEditingController.text == null ||
                   textEditingController.text == '') {
+                /// TODO : need a Snackbar
                 Navigator.pop(context);
               } else {
-                Lists newList = Lists(
-                    listName: textEditingController.text, listStatus: true);
+                Lists newList = Lists(listName: textEditingController.text);
                 DatabaseHelper.instance.insertList(newList);
-                createdListId() async {
-                  Future<int> lastCreatedListId = DatabaseHelper.instance
-                      .getListsList()
-                      .then((value) => value.last.listId);
-                  lastListId = await lastCreatedListId;
-                }
-
-                await createdListId();
+                await _getCreatedList();
+                DatabaseHelper.instance.updateAllList();
+                lastList.listStatus = 1;
+                DatabaseHelper.instance.updateList(lastList);
+                Future<Lists> aListWithSelectedStatus = DatabaseHelper.instance
+                    .getListsList()
+                    .then((value) => value.singleWhere(
+                          (element) => element.listStatus == 1,
+                        ));
+                aListIdWithSelectedStatus =
+                    await aListWithSelectedStatus.then((value) => value.listId);
+                print('aListIdWithSelectedStatus : $aListIdWithSelectedStatus');
                 // MenuBottomSheet(newCreatedList: newList);
                 // widget.updateListsList;
-                Navigator.pop(context, lastListId);
-                print('newList.listId : $lastListId');
+                Navigator.pop(context, aListIdWithSelectedStatus);
+                print('newList.listId : ${lastList.listId}');
                 showModalBottomSheet(
                   context: context,
                   builder: (build) => MenuBottomSheet(),

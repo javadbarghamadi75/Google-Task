@@ -27,16 +27,39 @@ class _MenuBottomSheetState extends State<MenuBottomSheet> {
   // static var selectedIndex;
   int listLength = 0;
   bool defaultListIsSelected = false;
+  int defaultFirstListId;
+  Lists defaultCreatedFirstList;
+  int aListIdWithSelectedStatus;
 
   @override
   void initState() {
     print('initState');
-    // _selectList(listToSelect: lastIndex);
-    // setState(() {
-    // selectedList = widget.newCreatedList == null ? null : widget.newCreatedList;
-    // });
+
+    ///`hamin avval k id nadare!!! bayad bere to database baad!`
     _updateListsList();
     super.initState();
+  }
+
+  _buildDefaultList() async {
+    Lists defaultList = Lists(
+      listName: 'My Tasks',
+    ); // TODO : check needed or not!
+    DatabaseHelper.instance.insertList(defaultList);
+    print('defaultFirstList.listId : ${defaultList.listId}');
+    await _getDefaultFirstListId();
+    selectedListId = defaultFirstListId;
+    print('defaultFirstListId : $defaultFirstListId');
+    _updateListsList();
+  }
+
+  _getDefaultFirstListId() async {
+    Future<int> defaultCreatedListId = DatabaseHelper.instance
+        .getListsList()
+        .then((value) => value.first.listId);
+    defaultFirstListId = await defaultCreatedListId;
+    Future<Lists> defaultCreatedListName =
+        DatabaseHelper.instance.getListsList().then((value) => value.first);
+    defaultCreatedFirstList = await defaultCreatedListName;
   }
 
   bool _selectList({int listToSelect}) {
@@ -53,9 +76,8 @@ class _MenuBottomSheetState extends State<MenuBottomSheet> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        print('pop Scope');
-        print('popscope print : $selectedList');
-        // selectedList;
+        print('pop Scoped!');
+        print('popscope print : $selectedListId');
         Navigator.pop(context, selectedList);
         return true;
       },
@@ -153,22 +175,13 @@ class _MenuBottomSheetState extends State<MenuBottomSheet> {
                 itemCount: snapshot.data.length,
                 itemBuilder: (BuildContext buildContext, int index) {
                   print('${snapshot.data[index].listId}');
-                  // lastIndex = snapshot.data.last;
+                  DatabaseHelper.instance.updateAllList();
                   return _list(snapshot.data[index]);
                 },
               );
             } else {
-              Lists defaultFirstList = Lists(
-                listName: 'My Tasks',
-                listStatus: true,
-              );
-              DatabaseHelper.instance.insertList(defaultFirstList);
-              // selectedList = defaultFirstList;
-              DatabaseHelper.instance.getListsList();
-
-              // selectedListId = defaultFirstList.listId;
-              _updateListsList();
-              return _list(defaultFirstList);
+              _buildDefaultList();
+              return _list(defaultCreatedFirstList);
             }
           }
           return Text('Connection State : not Done!');
@@ -176,9 +189,10 @@ class _MenuBottomSheetState extends State<MenuBottomSheet> {
   }
 
   Widget _list(Lists theList) {
-    // selectedListId = theList.listId;
-    // theList.listStatus = 0;
+    _updateListsList();
     return Padding(
+      /// `The getter 'listId' was called on null` => this is because im reading data from database. (in last senario I was passing the name to this widget)
+      /// Now I can 1: pass the name from here or 2: build the default list in Home `(That's better!)`
       padding: (theList.listId == 1)
           ? EdgeInsets.only(
               top: padding16,
@@ -207,36 +221,23 @@ class _MenuBottomSheetState extends State<MenuBottomSheet> {
             backgroundImage: null,
             backgroundColor: transparentColor,
           ),
-          onTap: () {
+          onTap: () async {
             setState(() {
-              // // (theList.listStatus == false)
-              // //     ? theList.listStatus = true
-              // //     : theList.listStatus = false;
-              // selectedListId = theList.listId;
-              // selectedList = theList;
               selectedListId = theList.listId;
-              // lastIndex = theList.listId;
             });
-            // HomePage(_selectedListName);
-            // Navigator.pop(context, _selectedListName);
+            DatabaseHelper.instance.updateAllList();
+            theList.listStatus = 1;
+            DatabaseHelper.instance.updateList(theList);
+            Future<Lists> aListWithSelectedStatus = DatabaseHelper.instance
+                .getListsList()
+                .then((value) => value.singleWhere(
+                      (element) => element.listStatus == 1,
+                    ));
+            selectedList = await aListWithSelectedStatus;
             print('ontap print : $selectedList');
-            // if (selectedListId == theList.listId) {
-            //   return null;
-            // } else
             Navigator.pop(context, selectedList);
-            // Navigator.pop(context, selectedList);
           },
-          // selected: _selectList(),
-          selected: (defaultListIsSelected)
-              ? true
-              : (theList.listId == lastIndex)
-                  ? true
-                  : selectedListId == theList.listId,
-          // selected: (selectedList.listStatus == 1)?true:,
-          // selected: (theList.listId == selectedList.listId),
-          // selected: selectedListId == theList.listId,
-          // selected: selectedList?.listStatus,
-          // selected: selectedListId == theList.listId,
+          selected: selectedListId == theList.listId,
           selectedTileColor: saveButtonColor.withOpacity(0.1),
         ),
       ),
@@ -275,11 +276,8 @@ class _MenuBottomSheetState extends State<MenuBottomSheet> {
         ).then(
           (value) => {
             print('creatListPage value : $value'),
-            // newCreatedList = value.listId,
-            // selectedListId = newCreatedList,
-            lastIndex = value,
-            lastIndex = lastIndex - 1,
-            print('lastIndex : $lastIndex'),
+            selectedListId = value,
+            print('lastIndex : $value'),
             // _list(value),
           },
         );

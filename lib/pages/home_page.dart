@@ -259,17 +259,16 @@ class _HomePageState extends State<HomePage> {
         children: [
           IconButton(
             icon: Icon(Icons.menu),
-            onPressed: () async {
-              await showModalBottomSheet<Lists>(
+            onPressed: () {
+              showModalBottomSheet<Lists>(
                 context: buildContext,
                 builder: (build) => MenuBottomSheet(),
                 backgroundColor: Colors.transparent,
                 isScrollControlled: false,
-              ).then((value) => this.setState(() {
-                    print('value : ${value?.listId}');
+              ).then((selectedList) => this.setState(() {
+                    print('value from menu : $selectedList');
                     DatabaseHelper.instance.getListsList();
-                    selectedListFromMenu = value;
-                    print(selectedListFromMenu);
+                    selectedListFromMenu = selectedList;
                   }));
             },
           ),
