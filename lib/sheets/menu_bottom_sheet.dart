@@ -6,9 +6,9 @@ import 'package:google_task/pages/home_page.dart';
 import 'package:google_task/res.dart';
 
 class MenuBottomSheet extends StatefulWidget {
-  // final Lists newCreatedList;
+  // final Future<dynamic> updateHome;
 
-  // MenuBottomSheet({this.newCreatedList});
+  // MenuBottomSheet({this.updateHome});
 
   @override
   _MenuBottomSheetState createState() => _MenuBottomSheetState();
@@ -17,9 +17,9 @@ class MenuBottomSheet extends StatefulWidget {
 class _MenuBottomSheetState extends State<MenuBottomSheet> {
   ImageProvider<Object> _userProfileImage;
   Future<List<Lists>> _listsList;
-  static Lists selectedList;
-  static int selectedListId;
-  static String selectedListName;
+  Lists selectedList;
+  int selectedListId;
+  String selectedListName;
   static int _listIsSelected = 0;
   static int newCreatedList;
   static int lastIndex;
@@ -30,6 +30,7 @@ class _MenuBottomSheetState extends State<MenuBottomSheet> {
   int defaultFirstListId;
   Lists defaultCreatedFirstList;
   int aListIdWithSelectedStatus;
+  Lists defaultName;
 
   @override
   void initState() {
@@ -37,30 +38,65 @@ class _MenuBottomSheetState extends State<MenuBottomSheet> {
 
     ///`hamin avval k id nadare!!! bayad bere to database baad!`
     _updateListsList();
+    _getSelectedListId();
     super.initState();
   }
 
-  _buildDefaultList() async {
-    Lists defaultList = Lists(
-      listName: 'My Tasks',
-    ); // TODO : check needed or not!
-    DatabaseHelper.instance.insertList(defaultList);
-    print('defaultFirstList.listId : ${defaultList.listId}');
-    await _getDefaultFirstListId();
-    selectedListId = defaultFirstListId;
-    print('defaultFirstListId : $defaultFirstListId');
-    _updateListsList();
+  _getSelectedListId() async {
+    Future<int> result =
+        DatabaseHelper.instance.getListsList().then((value) => value.length);
+    int listsListLength = await result;
+    if (listsListLength > 0 || listsListLength != null) {
+      DatabaseHelper.instance.getListsList();
+      Future<Lists> aListWithSelectedStatus = DatabaseHelper.instance
+          .getListsList()
+          .then((value) => value.singleWhere(
+                (element) => element.listStatus == 1,
+              ));
+      selectedList = await aListWithSelectedStatus.then((value) => value);
+      setState(() {
+        selectedList = selectedList;
+        selectedListId = selectedList.listId;
+        selectedListName = selectedList.listName;
+      });
+      print('selectedListName in initState : $selectedListName');
+    }
+    // else {
+    //   Future<Lists> defaultListName =
+    //       DatabaseHelper.instance.getListsList().then((value) => value.first);
+    //   defaultName = await defaultListName;
+    // }
   }
 
-  _getDefaultFirstListId() async {
-    Future<int> defaultCreatedListId = DatabaseHelper.instance
-        .getListsList()
-        .then((value) => value.first.listId);
-    defaultFirstListId = await defaultCreatedListId;
-    Future<Lists> defaultCreatedListName =
-        DatabaseHelper.instance.getListsList().then((value) => value.first);
-    defaultCreatedFirstList = await defaultCreatedListName;
-  }
+  // Future<Lists> _kireKhar() async {
+  //   Future<Lists> defaultListName =
+  //       DatabaseHelper.instance.getListsList().then((value) => value.first);
+  //   defaultName = await defaultListName;
+  //   print('defaultName 1 : $defaultName');
+  //   return defaultName;
+  // }
+
+  // _buildDefaultList() async {
+  //   Lists defaultList = Lists(
+  //     listName: 'My Tasks',
+  //   ); // TODO : check needed or not!
+  //   DatabaseHelper.instance.insertList(defaultList);
+  //   print('defaultFirstList.listId : ${defaultList.listId}');
+  //   await _getDefaultFirstListId();
+  //   selectedListId = defaultFirstListId;
+  //   print('defaultFirstListId : $defaultFirstListId');
+  //   _updateListsList();
+  // }
+
+  // _getDefaultFirstListId() async {
+  //   Future<int> defaultCreatedListId = DatabaseHelper.instance
+  //       .getListsList()
+  //       .then((value) => value.first.listId);
+  //   defaultFirstListId = await defaultCreatedListId;
+  //   Future<Lists> defaultCreatedListName =
+  //       DatabaseHelper.instance.getListsList().then((value) => value.first);
+  //   defaultCreatedFirstList = await defaultCreatedListName;
+  // }
 
   bool _selectList({int listToSelect}) {
     if (selectedListId == lastIndex) return true;
@@ -78,7 +114,8 @@ class _MenuBottomSheetState extends State<MenuBottomSheet> {
       onWillPop: () async {
         print('pop Scoped!');
         print('popscope print : $selectedListId');
-        Navigator.pop(context, selectedList);
+        // Navigator.pop(context, widget.updateHome);
+        Navigator.pop(context, selectedListName);
         return true;
       },
       child: Container(
@@ -164,24 +201,23 @@ class _MenuBottomSheetState extends State<MenuBottomSheet> {
           }
           if (snapshot.connectionState == ConnectionState.done) {
             if (snapshot.hasData && snapshot.data.length > 0) {
-              lists.addAll(
-                snapshot.data.where((element) => element.listStatus == true),
-              );
-              // selectedList =
-              // lists.singleWhere((element) => element.listStatus == true);
               return ListView.builder(
                 physics: NeverScrollableScrollPhysics(),
                 shrinkWrap: true,
                 itemCount: snapshot.data.length,
                 itemBuilder: (BuildContext buildContext, int index) {
                   print('${snapshot.data[index].listId}');
-                  DatabaseHelper.instance.updateAllList();
+                  // DatabaseHelper.instance.updateAllList();
                   return _list(snapshot.data[index]);
                 },
               );
             } else {
-              _buildDefaultList();
-              return _list(defaultCreatedFirstList);
+              // _kireKhar();
+              // print('defaultName : $defaultName');
+              // setState(() {
+              //   selectedListId = defaultName.listId;
+              // });
+              // return _list(defaultName);
             }
           }
           return Text('Connection State : not Done!');
@@ -189,7 +225,7 @@ class _MenuBottomSheetState extends State<MenuBottomSheet> {
   }
 
   Widget _list(Lists theList) {
-    _updateListsList();
+    // _updateListsList();
     return Padding(
       /// `The getter 'listId' was called on null` => this is because im reading data from database. (in last senario I was passing the name to this widget)
       /// Now I can 1: pass the name from here or 2: build the default list in Home `(That's better!)`
@@ -221,21 +257,17 @@ class _MenuBottomSheetState extends State<MenuBottomSheet> {
             backgroundImage: null,
             backgroundColor: transparentColor,
           ),
-          onTap: () async {
+          onTap: () {
             setState(() {
               selectedListId = theList.listId;
+              print(theList.listId);
             });
             DatabaseHelper.instance.updateAllList();
             theList.listStatus = 1;
             DatabaseHelper.instance.updateList(theList);
-            Future<Lists> aListWithSelectedStatus = DatabaseHelper.instance
-                .getListsList()
-                .then((value) => value.singleWhere(
-                      (element) => element.listStatus == 1,
-                    ));
-            selectedList = await aListWithSelectedStatus;
             print('ontap print : $selectedList');
-            Navigator.pop(context, selectedList);
+            // Navigator.pop(context, widget.updateHome);
+            Navigator.pop(context, selectedListName);
           },
           selected: selectedListId == theList.listId,
           selectedTileColor: saveButtonColor.withOpacity(0.1),
@@ -262,9 +294,9 @@ class _MenuBottomSheetState extends State<MenuBottomSheet> {
           color: myTaskTextColor,
         ),
       ),
-      onTap: () async {
+      onTap: () {
         Navigator.pop(context);
-        await Navigator.push(
+        Navigator.push(
           context,
           MaterialPageRoute<int>(
             builder: (_) {
@@ -275,10 +307,10 @@ class _MenuBottomSheetState extends State<MenuBottomSheet> {
           ),
         ).then(
           (value) => {
-            print('creatListPage value : $value'),
-            selectedListId = value,
-            print('lastIndex : $value'),
-            // _list(value),
+            // print('creatListPage value : $value'),
+            // selectedListId = value,
+            // print('lastIndex : $value'),
+            // // _list(value),
           },
         );
       },

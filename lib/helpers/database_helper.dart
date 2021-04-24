@@ -85,9 +85,9 @@ class DatabaseHelper {
     await db.execute(
       '''
         CREATE TABLE $listsTable(
-          $colListId INTEGER PRIMARY KEY AUTOINCREMENT,
-          $colListName TEXT,
-          $colListStatus INTEGER DEFAULT 0
+          $colListId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+          $colListName TEXT NOT NULL,
+          $colListStatus INTEGER DEFAULT 0 NOT NULL
           )
       ''',
     );
@@ -96,9 +96,9 @@ class DatabaseHelper {
     await db.execute(
       '''
         CREATE TABLE $tasksTable(
-          $colListId INTEGER,
-          $colTaskId INTEGER PRIMARY KEY AUTOINCREMENT,
-          $colTaskStatus INTEGER,
+          $colListId INTEGER NOT NULL,
+          $colTaskId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+          $colTaskStatus INTEGER NOT NULL,
           $colTaskName TEXT,
           $colTaskDetail TEXT,
           $colTaskDate TEXT,
@@ -115,9 +115,9 @@ class DatabaseHelper {
     await db.execute(
       '''
         CREATE TABLE $subTasksTable(
-          $colTaskId INTEGER,
-          $colSubTaskId INTEGER PRIMARY KEY AUTOINCREMENT,
-          $colSubTaskStatus INTEGER,
+          $colTaskId INTEGER NOT NULL,
+          $colSubTaskId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+          $colSubTaskStatus INTEGER NOT NULL DEFAULT 0,
           $colSubTaskName TEXT,
           $colSubTaskDetail TEXT,
           $colSubTaskDate TEXT,

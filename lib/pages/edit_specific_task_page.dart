@@ -4,6 +4,7 @@ import 'package:google_task/helpers/database_helper.dart';
 import 'package:google_task/models/lists_model.dart';
 import 'package:google_task/models/subtasks_model.dart';
 import 'package:google_task/models/tasks_model.dart';
+import 'package:google_task/pages/edit_specific_subtask_page.dart';
 import 'package:google_task/pages/home_page.dart';
 import 'package:google_task/res.dart';
 import 'package:intl/intl.dart';
@@ -30,7 +31,7 @@ class EditSpecificTaskPage extends StatefulWidget {
 }
 
 class _EditSpecificTaskPageState extends State<EditSpecificTaskPage> {
-  //String _taskList;
+  int _theTaskList;
   int _theTaskStatus;
   String _theTaskName = '';
   String _theTaskDetail = '';
@@ -49,6 +50,7 @@ class _EditSpecificTaskPageState extends State<EditSpecificTaskPage> {
   List<String> listNames = [];
   List<Lists> listOfLists;
   String _selectedList = '';
+  List<String> subTasksList = [];
 
   dynamic _showDatePicker(BuildContext buildContext) async {
     DateTime pickedDate = await showRoundedDatePicker(
@@ -102,6 +104,8 @@ class _EditSpecificTaskPageState extends State<EditSpecificTaskPage> {
 
   @override
   void initState() {
+    _getSubTasksList();
+    print(subTasksList.length);
     // setState(() {
     //   _selectedList = listNames[widget.theTask.listId];
     // });
@@ -115,6 +119,14 @@ class _EditSpecificTaskPageState extends State<EditSpecificTaskPage> {
     _updateSubTasksList();
     _updateTask();
     super.initState();
+  }
+
+  _getSubTasksList() {
+    DatabaseHelper.instance
+        .getSubTasksList()
+        .then((value) => value.forEach((element) {
+              subTasksList.add(element.subTaskName);
+            }));
   }
 
   _getListNames() async {
@@ -138,6 +150,7 @@ class _EditSpecificTaskPageState extends State<EditSpecificTaskPage> {
   _setTheTaskFields() {
     setState(() {
       print('taskStatus set : ${widget.theTask.taskStatus}');
+      _theTaskList = widget.theTask.listId;
       _theTaskStatus = widget.theTask.taskStatus;
       _theTaskName = widget.theTask.taskName;
       _theTaskDetail = widget.theTask.taskDetail;
@@ -163,9 +176,11 @@ class _EditSpecificTaskPageState extends State<EditSpecificTaskPage> {
           taskDate: _theTaskDate,
           taskTime: _theTaskTime,
         );
-        print('taskStatus ooo : ${_theTaskStatus}');
+        print('taskId ooo : ${theUpdatedTask.taskId}');
         // theUpdatedTask.taskStatus = _theTaskStatus;
         theUpdatedTask.taskId = widget.theTask.taskId;
+        theUpdatedTask.listId = widget.theTask.listId;
+        print('taskId ooo : ${theUpdatedTask.taskId}');
         DatabaseHelper.instance.updateTask(theUpdatedTask);
         widget.updateTask;
         return true;
@@ -196,7 +211,7 @@ class _EditSpecificTaskPageState extends State<EditSpecificTaskPage> {
           child: TextButton(
             onPressed: () {
               (_theTaskStatus == 1) ? _theTaskStatus = 0 : _theTaskStatus = 1;
-              print('taskStatus ttt : ${_theTaskStatus}');
+              print('taskStatus ttt : $_theTaskStatus');
               // theUpdatedTask.taskId = widget.theTask.taskId;   ..  causing ui errorssssssssssss
               // theUpdatedTask.taskId = ;
               theUpdatedTask.taskStatus = _theTaskStatus;
@@ -335,6 +350,8 @@ class _EditSpecificTaskPageState extends State<EditSpecificTaskPage> {
                 itemCount: snapshot.data.length,
                 itemBuilder: (BuildContext buildContext, int index) {
                   if (snapshot.data[index].taskId == widget.theTask.taskId) {
+                    print(
+                        'snapshot.data[index] : ${snapshot.data[index].subTaskName}');
                     return _subTaskTile(snapshot.data[index]);
                   }
                   return Container();
@@ -354,10 +371,22 @@ class _EditSpecificTaskPageState extends State<EditSpecificTaskPage> {
   _subTaskTile(SubTasks theSubTask) {
     return ListTile(
       leading: Checkbox(
-        value: true,
-        onChanged: (value) {},
+        value: theSubTask.subTaskStatus == 1 ? true : false,
+        onChanged: (value) {
+          theSubTask.subTaskStatus = value ? 1 : 0;
+        },
       ),
       title: TextFormField(
+        onTap: () {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => EditSpecificSubTaskPage(theSubTask: theSubTask),
+              )).then((value) => this.setState(() {
+                _updateSubTasksList();
+              }));
+        },
+        readOnly: true,
         initialValue: theSubTask.subTaskName,
         decoration: InputDecoration.collapsed(hintText: null),
       ),
@@ -385,6 +414,7 @@ class _EditSpecificTaskPageState extends State<EditSpecificTaskPage> {
             SubTasks createdSubTask = SubTasks(
               subTaskName: _enterSubTaskNameController.text,
               taskId: widget.theTask.taskId,
+              subTaskStatus: 0,
             );
             DatabaseHelper.instance.insertSubTask(createdSubTask);
             _updateSubTasksList();

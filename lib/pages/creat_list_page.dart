@@ -74,23 +74,25 @@ class _CreatListPageState extends State<CreatListPage> {
                 /// TODO : need a Snackbar
                 Navigator.pop(context);
               } else {
-                Lists newList = Lists(listName: textEditingController.text);
+                DatabaseHelper.instance.updateAllList();
+                Lists newList =
+                    Lists(listName: textEditingController.text, listStatus: 1);
                 DatabaseHelper.instance.insertList(newList);
                 await _getCreatedList();
-                DatabaseHelper.instance.updateAllList();
                 lastList.listStatus = 1;
-                DatabaseHelper.instance.updateList(lastList);
-                Future<Lists> aListWithSelectedStatus = DatabaseHelper.instance
-                    .getListsList()
-                    .then((value) => value.singleWhere(
-                          (element) => element.listStatus == 1,
-                        ));
-                aListIdWithSelectedStatus =
-                    await aListWithSelectedStatus.then((value) => value.listId);
-                print('aListIdWithSelectedStatus : $aListIdWithSelectedStatus');
-                // MenuBottomSheet(newCreatedList: newList);
-                // widget.updateListsList;
-                Navigator.pop(context, aListIdWithSelectedStatus);
+                // DatabaseHelper.instance.updateList(lastList);
+                // Future<Lists> aListWithSelectedStatus = DatabaseHelper.instance
+                //     .getListsList()
+                //     .then((value) => value.singleWhere(
+                //           (element) => element.listStatus == 1,
+                //         ));
+                // aListIdWithSelectedStatus =
+                //     await aListWithSelectedStatus.then((value) => value.listId);
+                // print('aListIdWithSelectedStatus : $aListIdWithSelectedStatus');
+                // // MenuBottomSheet(newCreatedList: newList);
+                // // widget.updateListsList;
+                // Navigator.pop(context, aListIdWithSelectedStatus);
+                Navigator.pop(context);
                 print('newList.listId : ${lastList.listId}');
                 showModalBottomSheet(
                   context: context,

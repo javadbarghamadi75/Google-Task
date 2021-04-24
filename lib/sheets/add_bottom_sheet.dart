@@ -19,7 +19,7 @@ class _AddBottomSheetState extends State<AddBottomSheet> {
   bool _addDetailsTextFieldVisibility = false;
   String _setTimeText = 'Set Time';
   DateTime _selectedDate;
-  TimeOfDay _selectedTime = nowTime;
+  TimeOfDay _selectedTime;
   String _chipDateText;
   String _chipTimeText;
   final TextEditingController _newTaskInput = TextEditingController();
@@ -250,8 +250,9 @@ class _AddBottomSheetState extends State<AddBottomSheet> {
                 taskName: _newTaskInput.text,
                 taskDetail: _addDetailsInput.text,
                 //taskDate: DateTime.parse(_chipDateText),
-                taskDate: _selectedDate.toString(),
-                taskTime: _chipTimeText,
+                taskDate:
+                    (_selectedDate == null) ? null : _selectedDate.toString(),
+                taskTime: (_chipTimeText == null) ? null : _chipTimeText,
               );
               print('taskStatus : ${newTask.taskStatus}');
               DatabaseHelper.instance.insertTask(newTask);
